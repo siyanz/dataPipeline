@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Byte 1 Tutorial</title>
+	<title>Byte 1</title>
 </head>
 <body>
-	<h1>Data Pipeline Project Byte 1 Example</h1>
-	<form action="search" method="POST">
-  		Search Term: <input name="search_term" value={{search}}><br>
-  		<input type="submit" value="Enter Search Term">
-	</form>
-	{% if search: %}
-	<p>Searching for {{search}}</p>
-	{% endif %}
-	<h2>Feed Contents</h2>
-	{% for item in feed %}
-	<a href="{{ item.link }}">{{ item.title }}</a><br>
-	{{item.description|safe}}
+	<h1>How often does a website update its world news?</h1>
 	<br>
-	{% endfor %}
+	<form method="POST">
+		<select name="source">
+			<option name="CNN" value="https://pipes.yahoo.com/pipes/pipe.run?_id=a3f7d6f6a403e7ccec84c895972bb154&_render=rss">CNN</option>
+			<option name="NYT" value="http://rss.nytimes.com/services/xml/rss/nyt/World.xml">New York Times</option>
+			<option name="REUTER" value="http://mf.feeds.reuters.com/reuters/UKWorldNews">Reuter</option>
+			<option name="BBC" value="https://pipes.yahoo.com/pipes/pipe.run?_id=f3650894a77fa1323e83eebe8beace62&_render=rss">BBC</option>
+		</select>
+		<input type="submit" value="Check update frequency">
+	</form>
+	<h2>This news website updates, on average, every {{h}} hour, {{m}} minutes, {{s}} seconds</h2>
+	<p>The last news: <a href="{{ feed[0].link }}">{{ feed[0].title }}</a> was updated on {{last}} {{ time_zone }}</p>
+	
+	<br>
 </body>
 </html>

@@ -6,6 +6,7 @@ import webapp2
 import feedparser 
 import logging
 import urllib
+import datetime
  
 
 # BaseHandler subclasses RequestHandler so that we can use jinja
@@ -29,27 +30,47 @@ class BaseHandler(webapp2.RequestHandler):
 class MainHandler(BaseHandler):
          # This method should return the html to be displayed
     def get(self):
-        feed = feedparser.parse("http://pipes.yahoo.com/pipes/pipe.run?_id=1nWYbWm82xGjQylL00qv4w&_render=rss")
+        feed = feedparser.parse("https://pipes.yahoo.com/pipes/pipe.run?_id=a3f7d6f6a403e7ccec84c895972bb154&_render=rss")
 
         feed = [{"link": item.link, "title":item.title, "description" : item.description} for item in feed["items"]]
 
         # this will eventually contain information about the RSS feed
-        context = {"feed" : feed, "search": "dog"}
+        context = {"feed" : feed}
 
         # here we call render_response instead of self.response.write.
         self.render_response('index.html', **context)
 
     def post(self):
         logging.info("post")
-        terms = self.request.get('search_term')
-
-        terms = urllib.quote(terms)
+        terms = self.request.get("source")
 
         # This is the url for the yahoo pipe created in our tutorial
-        feed = feedparser.parse("http://pipes.yahoo.com/pipes/pipe.run?_id=1nWYbWm82xGjQylL00qv4w&_render=rss&textinput1=" + terms )
-        feed = [{"link": item.link, "title":item.title, "description" : item.description} for item in feed["items"]]
+        feed = feedparser.parse(terms)
+        feed = [{"link": item.link, "title":item.title, "description" : item.description, "pubDate": item.published} for item in feed["items"]]
 
-        context = {"feed": feed, "search": terms}
+        all_time = []
+        total_time = 0
+        news_count=20
+
+        for item in feed:
+            date = item["pubDate"].split(" ")[4]
+            time = datetime.time(hour=int(date[0:2]), minute=int(date[3:5]), second=int(date[6:8]))
+            all_time.append(time)
+
+        for n in range(1, news_count):
+            lapse = datetime.timedelta(
+                    hours = (all_time[n-1].hour - all_time[n].hour),
+                    minutes = (all_time[n-1].minute - all_time[n].minute)
+                    )
+            total_time += lapse.seconds
+
+        avg = total_time/(news_count-1)
+
+        hour=int(avg/60/60)
+        minute=int((avg-hour*60*60)/60)
+        second=avg-hour*60*60-minute*60
+
+        context = {"feed": feed, "h": hour, "m": minute, "s": second, "last": all_time[0], "time_zone": feed[0]["pubDate"].split(" ")[5]}
         self.render_response('index.html', **context)
 
 # this sets up the correct callback for [yourname]-byte1.appspot.com
