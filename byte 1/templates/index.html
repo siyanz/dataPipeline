@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
 	<title>Byte 1</title>
 </head>
 <body>
-	<h1>How often does a website update its world news?</h1>
-	<br>
+	<h1>How often does a website update its world news feed?</h1>
 	<form method="POST">
-		<select name="source">
-			<option name="CNN" value="https://pipes.yahoo.com/pipes/pipe.run?_id=a3f7d6f6a403e7ccec84c895972bb154&_render=rss">CNN</option>
-			<option name="NYT" value="http://rss.nytimes.com/services/xml/rss/nyt/World.xml">New York Times</option>
-			<option name="REUTER" value="http://mf.feeds.reuters.com/reuters/UKWorldNews">Reuter</option>
-			<option name="BBC" value="https://pipes.yahoo.com/pipes/pipe.run?_id=f3650894a77fa1323e83eebe8beace62&_render=rss">BBC</option>
+		<p>Choose a website: <select id="selector" name="source">
+			<option name="CNN" value="1">CNN</option>
+			<option name="NYT" value="2" >New York Times</option>
+			<option name="REUTER" value="3">Reuter</option>
+			<option name="BBC" value="4">BBC</option>
 		</select>
-		<input type="submit" value="Check update frequency">
+		<input type="submit" value="Check update frequency"></p>
 	</form>
-	<h2>This news website updates, on average, every {{h}} hour, {{m}} minutes, {{s}} seconds</h2>
-	<p>The last news: <a href="{{ feed[0].link }}">{{ feed[0].title }}</a> was updated on {{last}} {{ time_zone }}</p>
-	
+	<hr>
+	<h2>{{selected}} updates, on average, every {{h}} hour, {{m}} minutes, {{s}} seconds.</h2>
+	<p>The last news: <a href="{{ feed[0].link }}">{{ feed[0].title }}</a> was updated on {{date}} {{last}} {{ time_zone }}</p>
 	<br>
 </body>
 </html>

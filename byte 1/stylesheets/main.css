@@ -1,0 +1,17 @@
+body {
+  font-family: Helvetica, sans-serif;
+  font-size: 10pt;
+  margin-top: 40px;
+}
+
+
+
+p{
+	font-family: Garamond, serif;
+	font-size:11pt;
+}
+
+h2{
+	font-size: 14pt;
+	display: inline;
+}

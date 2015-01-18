@@ -44,6 +44,18 @@ class MainHandler(BaseHandler):
         logging.info("post")
         terms = self.request.get("source")
 
+        if terms == "1":
+            terms = "https://pipes.yahoo.com/pipes/pipe.run?_id=a3f7d6f6a403e7ccec84c895972bb154&_render=rss"
+            selected = "CNN"
+        elif terms == "2":
+            terms = "http://rss.nytimes.com/services/xml/rss/nyt/World.xml"
+            selected = "New York Times"
+        elif terms == "3":
+            terms = "http://mf.feeds.reuters.com/reuters/UKWorldNews"
+            selected = "Reuter"
+        elif terms == "4":
+            terms = "https://pipes.yahoo.com/pipes/pipe.run?_id=f3650894a77fa1323e83eebe8beace62&_render=rss"
+            selected = "BBC"
         # This is the url for the yahoo pipe created in our tutorial
         feed = feedparser.parse(terms)
         feed = [{"link": item.link, "title":item.title, "description" : item.description, "pubDate": item.published} for item in feed["items"]]
@@ -70,7 +82,9 @@ class MainHandler(BaseHandler):
         minute=int((avg-hour*60*60)/60)
         second=avg-hour*60*60-minute*60
 
-        context = {"feed": feed, "h": hour, "m": minute, "s": second, "last": all_time[0], "time_zone": feed[0]["pubDate"].split(" ")[5]}
+        context = {"feed": feed, "h": hour, "m": minute, "s": second, 
+            "last": all_time[0], "time_zone": feed[0]["pubDate"].split(" ")[-1], 
+            "date":feed[0]["pubDate"].split(" ")[0], "selected": selected}
         self.render_response('index.html', **context)
 
 # this sets up the correct callback for [yourname]-byte1.appspot.com
