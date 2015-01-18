@@ -43,7 +43,7 @@ def check_source(source):
         selected = "BBC"
     elif source =="5":
         source = "http://feeds.washingtonpost.com/rss/world"
-        selected = "Associated Press"
+        selected = "Washington Post"
 
     return [source, selected]
 
@@ -106,7 +106,6 @@ class MainHandler(BaseHandler):
         feed = result[0]
 
         for i in range(1,6):
-            logging.info(i)
             other_source = get_time(str(i))
             time = other_source[1] * 60 * 60 + other_source[2] * 60 + other_source[3]
             comp[other_source[5]] = time
