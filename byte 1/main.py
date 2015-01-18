@@ -26,13 +26,67 @@ class BaseHandler(webapp2.RequestHandler):
         rv = self.jinja2.render_template(_template, **context)
         self.response.write(rv)
 
+def check_source(source):
+    selected=""
+
+    if source == "1":
+        source = "https://pipes.yahoo.com/pipes/pipe.run?_id=a3f7d6f6a403e7ccec84c895972bb154&_render=rss"
+        selected = "CNN"
+    elif source == "2":
+        source = "http://rss.nytimes.com/services/xml/rss/nyt/World.xml"
+        selected = "New York Times"
+    elif source == "3":
+        source = "http://mf.feeds.reuters.com/reuters/UKWorldNews"
+        selected = "Reuter"
+    elif source == "4":
+        source = "https://pipes.yahoo.com/pipes/pipe.run?_id=f3650894a77fa1323e83eebe8beace62&_render=rss"
+        selected = "BBC"
+    elif source =="5":
+        source = "http://feeds.washingtonpost.com/rss/world"
+        selected = "Associated Press"
+
+    return [source, selected]
+
+def get_time(terms):
+    all_time = []
+    total_time = 0
+    news_count=20
+
+    source = check_source(terms)
+
+    # This is the url for the yahoo pipe created in our tutorial
+    feed = feedparser.parse(source[0])
+    feed = [{"link": item.link, "title":item.title, "pubDate": item.published} for item in feed["items"]]
+
+    for item in feed:
+        date = item["pubDate"].split(" ")[4]
+        time = datetime.time(hour=int(date[0:2]), minute=int(date[3:5]), second=int(date[6:8]))
+        all_time.append(time)
+
+    for n in range(1, news_count):
+        lapse = datetime.timedelta(
+                hours = (all_time[n-1].hour - all_time[n].hour),
+                minutes = (all_time[n-1].minute - all_time[n].minute)
+                )
+        total_time += lapse.seconds
+
+    avg = total_time/(news_count-1)
+
+    hour=int(avg/60/60)
+    minute=int((avg-hour*60*60)/60)
+    second=avg-hour*60*60-minute*60
+
+    return [feed, hour, minute, second, all_time[0], source[1], terms]
+
+
 # Class MainHandler now subclasses BaseHandler instead of webapp2
 class MainHandler(BaseHandler):
+    
          # This method should return the html to be displayed
     def get(self):
         feed = feedparser.parse("https://pipes.yahoo.com/pipes/pipe.run?_id=a3f7d6f6a403e7ccec84c895972bb154&_render=rss")
 
-        feed = [{"link": item.link, "title":item.title, "description" : item.description} for item in feed["items"]]
+        feed = [{"link": item.link, "title":item.title} for item in feed["items"]]
 
         # this will eventually contain information about the RSS feed
         context = {"feed" : feed}
@@ -44,47 +98,36 @@ class MainHandler(BaseHandler):
         logging.info("post")
         terms = self.request.get("source")
 
-        if terms == "1":
-            terms = "https://pipes.yahoo.com/pipes/pipe.run?_id=a3f7d6f6a403e7ccec84c895972bb154&_render=rss"
-            selected = "CNN"
-        elif terms == "2":
-            terms = "http://rss.nytimes.com/services/xml/rss/nyt/World.xml"
-            selected = "New York Times"
-        elif terms == "3":
-            terms = "http://mf.feeds.reuters.com/reuters/UKWorldNews"
-            selected = "Reuter"
-        elif terms == "4":
-            terms = "https://pipes.yahoo.com/pipes/pipe.run?_id=f3650894a77fa1323e83eebe8beace62&_render=rss"
-            selected = "BBC"
-        # This is the url for the yahoo pipe created in our tutorial
-        feed = feedparser.parse(terms)
-        feed = [{"link": item.link, "title":item.title, "description" : item.description, "pubDate": item.published} for item in feed["items"]]
+        comp ={}
+        fastest_t = 0
+        fastest_source = ""
 
-        all_time = []
-        total_time = 0
-        news_count=20
+        result = get_time(terms)
+        feed = result[0]
 
-        for item in feed:
-            date = item["pubDate"].split(" ")[4]
-            time = datetime.time(hour=int(date[0:2]), minute=int(date[3:5]), second=int(date[6:8]))
-            all_time.append(time)
+        for i in range(1,6):
+            logging.info(i)
+            other_source = get_time(str(i))
+            time = other_source[1] * 60 * 60 + other_source[2] * 60 + other_source[3]
+            comp[other_source[5]] = time
+            if (fastest_t == 0):
+                fastest_t = time
+                fastest_source = other_source[5]
+            else:
+                if (fastest_t > time):
+                    fastest_t = time
+                    fastest_source = other_source[0]
 
-        for n in range(1, news_count):
-            lapse = datetime.timedelta(
-                    hours = (all_time[n-1].hour - all_time[n].hour),
-                    minutes = (all_time[n-1].minute - all_time[n].minute)
-                    )
-            total_time += lapse.seconds
+        fastest_h = fastest_t/60/60
+        fastest_m = (fastest_t - fastest_h * 60 * 60)/60
+        fastest_s = fastest_t - fastest_h * 60 * 60 - fastest_m * 60
 
-        avg = total_time/(news_count-1)
+        context = {"feed": feed, "h": result[1], "m": result[2], "s": result[3], 
+            "last": result[4], "time_zone": feed[0]["pubDate"].split(" ")[-1], 
+            "date":feed[0]["pubDate"].split(" ")[0], "selected": result[5],
+            "fastest_s": fastest_s, "fastest_m": fastest_m,"fastest_h": fastest_h,
+            "fastest_source": fastest_source}
 
-        hour=int(avg/60/60)
-        minute=int((avg-hour*60*60)/60)
-        second=avg-hour*60*60-minute*60
-
-        context = {"feed": feed, "h": hour, "m": minute, "s": second, 
-            "last": all_time[0], "time_zone": feed[0]["pubDate"].split(" ")[-1], 
-            "date":feed[0]["pubDate"].split(" ")[0], "selected": selected}
         self.render_response('index.html', **context)
 
 # this sets up the correct callback for [yourname]-byte1.appspot.com

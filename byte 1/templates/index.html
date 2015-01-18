@@ -7,17 +7,18 @@
 <body>
 	<h1>How often does a website update its world news feed?</h1>
 	<form method="POST">
-		<p>Choose a website: <select id="selector" name="source">
+		<p>Choose a website: <select name="source">
 			<option name="CNN" value="1">CNN</option>
 			<option name="NYT" value="2" >New York Times</option>
 			<option name="REUTER" value="3">Reuter</option>
 			<option name="BBC" value="4">BBC</option>
+			<option name="WP" value="5">Washington Post</option>
 		</select>
 		<input type="submit" value="Check update frequency"></p>
 	</form>
 	<hr>
 	<h2>{{selected}} updates, on average, every {{h}} hour, {{m}} minutes, {{s}} seconds.</h2>
 	<p>The last news: <a href="{{ feed[0].link }}">{{ feed[0].title }}</a> was updated on {{date}} {{last}} {{ time_zone }}</p>
-	<br>
+	<p>{{fastest_source}} updates the most frequently of all, around every {{fastest_h}} hour, {{fastest_m}} minutes, {{fastest_s}} seconds.</p>
 </body>
 </html>
