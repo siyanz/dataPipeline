@@ -2,42 +2,21 @@
 <html>
 <head>
 	<title>Byte 2</title>
-	<!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
-
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
-
+  	<link href="stylesheets/d3.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="d3/d3.v3.js"></script>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
 
-    <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1','packages':['corechart']}]}"></script>
-	
-	<script>
-    google.load('visualization', '1', {packages: ['corechart']});
-    google.setOnLoadCallback(drawChart);
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 
-    function drawChart() {
 
-	var data = google.visualization.arrayToDataTable({{data|safe}});
 
-	console.log
-      var options = {
-		title: 'Animal Outcomes based on Age at Arrival',
-		width: 600, height: 400,
-		chartArea: {height: '50%'},
-		hAxis: {title: 'Age', titleTextStyle: {color: 'red'}}
-		};
-
-      var chart = new google.visualization.ColumnChart(
-        document.getElementById('ex1'));
-
-      chart.draw(data, options);
-    }
-    </script>
 </head>
 
 <body>
@@ -45,44 +24,153 @@
 		<div class="container">
 			<h3 class="navbar-header">Byte 2</h3>
 		</div>
+
+	<div id="tooltip" class="hidden">
+       <p><strong>Number of Animals:</strong></p>
+       <p><span id="value">100</span></p>
+    </div>
 		
 	</div>
 	<div class="container">
-		<div class="row marketing">
-			<div class="col-lg-4">
-				<h3>What are the percentage of the dogs spayed or neutered?</h3>
-				<br>
-				<p>This result was quite a surprise to me as I was expecting most of the dogs taken into the animal service would not be spayed/neutered. This shows that 59% of the dogs taken in were probably once a housed dog.</p>
-			</div>
-			<div class="col-lg-6">
-				<iframe width="600" height="300" scrolling="no" frameborder="no" src="https://www.google.com/fusiontables/embedviz?containerId=googft-gviz-canvas&amp;q=select+col9%3E%3E0%2C+count()+from+1V-zsxH7mLEiM6ueBDTLbL3PcPbN_V_HG6W3nA_54+where+col1%3E%3E0+%3D+&#39;DOG&#39;+group+by+col9%3E%3E0+order+by+count()+asc+limit+10&amp;viz=GVIZ&amp;t=PIE&amp;uiversion=2&amp;gco_forceIFrame=true&amp;gco_hasLabelsColumn=true&amp;width=600&amp;height=300"></iframe>
-			</div>
-		</div>
+			<script>
 
-		<div class="row marketing">
-			<div class="col-lg-5">
-				<iframe width="400" height="300" scrolling="no" frameborder="no" src="https://www.google.com/fusiontables/embedviz?containerId=googft-gviz-canvas&amp;viz=GVIZ&amp;t=GRAPH&amp;gc=false&amp;gd=false&amp;sdb=1&amp;rmax=100000&amp;q=select+col9%3E%3E0%2C+col13%3E%3E0%2C+col3%3E%3E0+from+1V-zsxH7mLEiM6ueBDTLbL3PcPbN_V_HG6W3nA_54+where+col1%3E%3E0+%3D+&#39;DOG&#39;&amp;qrs=+and+col9%3E%3E0+%3E%3D+&amp;qre=+and+col9%3E%3E0+%3C%3D+&amp;qe=&amp;uiversion=2&amp;state=%7B%22ps%22%3A%221_0_20_-g_2_k_6_4_13_w_5_1u_j_3_2i_-1d_9_z_-u_7_14_-e_8_-h_7_1_-3_-13_6_-t_o_c_p_-2j_b_l_-2z_a_g_2o_f_-1b_-1k_%22%2C%22cx%22%3A84.05635849891009%2C%22cy%22%3A-22.395950074840947%2C%22sw%22%3A631.8192332738256%2C%22sh%22%3A275.09832644936904%2C%22z%22%3A1.9655015577703852%7D&amp;gco_forceIFrame=true&amp;gco_hasLabelsColumn=true&amp;width=400&amp;height=300"></iframe>
-			</div>
-			<div class="col-lg-4">
-				<h3>Are spayed/neutered dogs more likely to be adopted and fostered?</h3>
-				<br>
-				<p>I was interested to see if dogs that were already spayed/neutered were more likely to be adopted. And this was the case. The network graph showed thicker lines between "true" - "adopted" compared to "false" - "adopted".</p>
-			</div>
-		</div>
-		<br>
-		    
-    
-        <div id="ex1"></div>
-		<!-- <div class="row marketing">
-			<div class="col-lg-4">
-				<h3>Where are most of the dogs found?</h3>
-			</div>
-			<div class="col-lg-5">
-				<iframe width="500" height="300" scrolling="no" frameborder="no" src="https://www.google.com/fusiontables/embedviz?q=select++from+1V-zsxH7mLEiM6ueBDTLbL3PcPbN_V_HG6W3nA_54+where+col1%3E%3E0+%3D+&#39;DOG&#39;+limit+1000&amp;viz=HEATMAP&amp;h=true&amp;lat=38.12546066834223&amp;lng=-85.47127349853514&amp;t=1&amp;z=9&amp;l=col16%3E%3E0&amp;y=2&amp;tmplt=2&amp;hmd=true&amp;hmg=%2366ff0000%2C%2393ff00ff%2C%23c1ff00ff%2C%23eeff00ff%2C%23f4e300ff%2C%23f4e300ff%2C%23f9c600ff%2C%23ffaa00ff%2C%23ff7100ff%2C%23ff3900ff%2C%23ff0000ff&amp;hmo=0.48&amp;hmr=39&amp;hmw=0&amp;hml=TWO_COL_LAT_LNG"></iframe>
-			</div>
-		</div> -->
-		
-		
+   // ----------- EVERY CHART NEEDS DATA --------------
+   // this is the data we passed from main.py
+   // the format for data is: 
+   // [{outcome1: amount1, ..., outcomen: amountn,
+   // Age:'<6mo'}, ..., {outcome1: amount1, ... , Age: '>7yr'}]
+   var data = {{data|safe}}
+   // x_labels is an array of all the ages
+   var x_labels = {{x_labels|safe}}
+   // y_labels is an array of all the outcomes 
+   var y_labels = {{y_labels|safe}}
+
+   data.forEach(function(d){
+		// the y0 position (lowest position) for the first stacked bar will be 0 
+		var y0 = 0;
+		// we'll store everything in a list of dictionaries, d.outcomes
+		d.outcomes = y_labels.map(function(name) {
+		   // each outcome has a name, a y0 position (it's bottom)
+		   // and a y1 position (it's top). 
+		   res = {name: name, y0: y0, y1: y0 + d[name]};
+		   // and we also have to update y0 for the next rectangle
+		   y0 = y0 + d[name];
+		   return res;});
+		 // we also store the total height for this stacked bar
+		 d.total = d.outcomes[d.outcomes.length - 1].y1;
+		   })
+
+   // ----------- EVERY CHART NEEDS SOME SETUP --------------
+   //Width and height and margins for the plot 
+   var margin = {top: 20, right: 20, bottom: 30, left: 40},
+      width = 960 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+   
+   // set up the x axis scale to go from 0 to width
+   // rangeRoundBands sets up the bar width with no 
+   // fractional pixels, and the .1 specifies the distance between bars
+   var x_scale = d3.scale.ordinal()
+          .rangeRoundBands([0, width], .1);
+
+   // this specifies the domain of the x axis, which is ordinal
+   x_scale.domain(x_labels);
+
+   // set up the y axis scale to go from 0 to height
+   var y_scale = d3.scale.linear()
+          .rangeRound([height, 0]);       
+
+   // this specifies the domain of the y axis (0 to the height of
+   // the tallest bar), which is linear 
+   y_scale.domain([0, d3.max(data, function(d) { return d.total; })]);
+
+   // set up the color scale (there are 6 outcomes) 
+   var color = d3.scale.ordinal()
+          .range(["#C8A57F", "#B0AE6E", "#77BA84", "#29BDBF",
+   "#70B0F1", "#EB88E2"]);
+   
+   // create the x axis 
+   var xAxis = d3.svg.axis()
+               .scale(x_scale)
+               .orient("bottom");
+
+   // create the y axis
+   var yAxis = d3.svg.axis()
+              .scale(y_scale)
+              .orient("left")
+              .tickFormat(d3.format(".2s"));
+
+   // associate the y labels with the color scale
+   color.domain(y_labels);
+
+
+	// ------- D3's DOM MANIPULATION MAGIC GOES HERE -------
+    // the svg element is for drawing. We set its size based 
+	// on the margins defined earlier
+	var svg = d3.select("body").append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+		// and add a group that is inside the margins
+        .append("g")
+          // this makes sure that everything we do inside this group is translated to margin coordinates
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+       // draw the x axis (D3 handles the details in '.call')
+       svg.append("g")
+         .attr("class", "x axis")
+         .attr("transform", "translate(0," + height + ")")
+         .call(xAxis);
+       // draw the y axis (D3 handles the details in '.call')
+       svg.append("g")
+         .attr("class", "y axis")
+         .call(yAxis)
+       .append("text")
+         .attr("transform", "rotate(-90)")
+         .attr("y", 6)
+         .attr("dy", ".71em")
+         .style("text-anchor", "end")
+         .text("Number of Animals");
+
+   // Create a group for each age
+   var age = svg.selectAll(".Age")
+      .data(data)
+      .enter()
+      .append("g")
+        .attr("class", "g")
+        .attr("x_position", function(d) {return x_scale(d.Age);})
+        .attr("transform", function(d) {return "translate(" + x_scale(d.Age) + ",0)"; });
+
+   // create a rectangle for each outcome (for each age)
+   age.selectAll("rect")
+   // bind the outcome data for that age to that rectangle
+   .data(function(d) { return d.outcomes; })
+   .enter().append("rect")
+   .attr("width", x_scale.rangeBand())
+   // use the outcome data to determine y position and height
+   .attr("y", function(d) { return y_scale(d.y1); })
+   .attr("height", function(d) { return y_scale(d.y0) - y_scale(d.y1); })
+   // use the color scale to determine the fill color
+   .attr("fill", function(d) { return color(d.name); })
+
+  .on("mouseover", function(d) {
+   //Get this bar's x/y values, then augment for the tooltip
+   var xPosition = parseFloat(d3.select(this.parentNode).attr("x_position")) + 
+       x_scale.rangeBand() / 2;
+   var yPosition = parseFloat(d3.select(this).attr("y"));
+
+   //Update the tooltip position and value
+   d3.select("#tooltip")
+       .style("left", xPosition + "px")
+       .style("top", yPosition + "px")
+       .select("#value")
+       .text(d.y1-d.y0 + " animals were " + d.name + ".");
+
+   //Show the tooltip (it's a div that is otherwise always hidden)
+   d3.select("#tooltip").classed("hidden", false);
+	})
+	// and cause it to disappear when the mouse exits 
+	.on("mouseout", function(d) {
+	       d3.select("#tooltip").classed("hidden", true)});
+
+    </script>
 	</div>
 </body>
 </html>

@@ -91,7 +91,9 @@ class MainHandler(BaseHandler):
             # and increase it by one
             outcomes_for_age[outcome] = outcomes_for_age[outcome] + 1
         logging.info(json.encode(age_by_outcome))
-        context = {'data':json.encode(age_by_outcome)}
+        context = {'data':json.encode(age_by_outcome),
+                    'y_labels':outcomes,
+                    'x_labels':ages}
         # here we call render_response instead of self.response.write.
         self.render_response('index.html', **context)
 
