@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Byte 2</title>
+	<title>Byte 3</title>
   	<link href="stylesheets/d3.css" rel="stylesheet" type="text/css">
-    <script type="text/javascript" src="d3/d3.v3.js"></script>
+    <script type="text/javascript" src="d3/d3.min.js"></script>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 	<!-- Latest compiled and minified CSS -->
@@ -15,37 +15,82 @@
 	<!-- Latest compiled and minified JavaScript -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 
-
-
 </head>
 
 <body>
 	<div class="navbar navbar-default">
-		<div class="container">
-			<h3 class="navbar-header">Byte 2</h3>
-		</div>
+			<h3 class="navbar-header" style = "margin-left: 20px">Byte 3 - How do outcomes of sheltered dogs differ between age groups</h3>
+	</div>
 
-	<div id="tooltip" class="hidden">
+	<div class="container">
+    <div id = "legend"></div>
+    <div id="tooltip" class="hidden">
        <p><strong>Number of Animals:</strong></p>
        <p><span id="value">100</span></p>
+     </div>
+    <div id="tooltip2" class="hidden">
+       <p><strong>Number of Animals:</strong></p>
+       <p><span id="value">100</span></p>
+   </div>
+   <h4>Questions:</h4>
+   <ul>
+    <li>Are older dogs more likely to be euthanized? </li>
+    <li>Are younger dogs more likely to be adopted? </li>
+    <li>How many of those lost dogs get to find a warm home (either adopted, fostered or returned to owner)?</li>
+   </ul>
+
+    <div class="row marketing" style="margin-top: 50px">
+      <div class="col-lg-4">
+        <p>This graph summarizes the amount of dogs in each outcome. The green colors were cases where the dog was either adopted, fostered or returned to owner. Reds show dogs that died or was euthanized. Greys mean other categories and missing data. The colors in this graph makes it obvious to see the proportion of dogs with positive outcomes (adopted/fostered/returned to owner) and negative outcomes (died or euthanized). The pie chart says that more than 1/3 of the lost dogs get a warm home (yay). </p>
+        <p>After seeing the graph, I want to know more about how the outcomes differ for dogs of different ages. </p>
+      </div>
+      <div class="col-lg-4" id = "graph1">
+      </div>
+      <div class="col-lg-4" id = "legend_space">
+      </div>
     </div>
-		
-	</div>
-	<div class="container">
-			<script>
+    <br>
+
+    <div class="row marketing">
+
+      <div class="col-lg-4">
+        <p>Compared across age, I noticed two peaks in amount for 1 - 6 years and unspecified. </p>
+        <p>It is not surprising to see the majority of the dogs are within 1 - 6 years old as this age range spans across 5 years. </p>
+        <p>The large number of unspecified age caught my attention. It is unclear to me why these dogs had missing age data. But as I read the data, it is good to keep in mind that over 1/4 (2.5k out of 9.5k) of the dogs have a missing age datum.</p>
+        <p>To get a more direct comparison between age groups for each outcome, I converted the data to percentages.</p>
+      </div>
+      <div class="col-lg-6" id = "graph2">
+      </div>
+    </div>
+
+    <div class="row marketing">
+      <div class="col-lg-4">
+      <p>Now that all ages share the same scale, it is easier to see some trends.</p>
+      <p>First of all, the amount of dogs euthanized increases with age. This could be because as the dogs age, they suffer from more illnesses and it is considered to be ore morally acceptable to euthanize the older dogs due to their poorer physical conditions.</p>
+      <p>I also noticed an increase in returned to owners as age increases. My hypothesis for this is that the older dogs, having spent more time with their lost owners, developed deeper bond with the owners than the younger dogs. Hence, the owners of older dogs are more willing to devote more time and energy to retrieve their lost dogs.</p>
+      <p>Also, unsurprisingly, people are more like to adopt young dogs than older dogs, as seen in the decreasing trend in the amount of adoptions as the age increases.</p>
+      <p>One last interesting observation is that more baby dogs died after they were taken into the animal shelter. I am curious if this is a result of weaker immune system for puppies than for the older dogs. Hence, the baby dogs are more likely to die from deseases. </p>
+      </div>
+      <div class="col-lg-6" id = "graph3">
+      </div>
+    </div>
+  </div>
+		<script>
 
    // ----------- EVERY CHART NEEDS DATA --------------
    // this is the data we passed from main.py
    // the format for data is: 
    // [{outcome1: amount1, ..., outcomen: amountn,
    // Age:'<6mo'}, ..., {outcome1: amount1, ... , Age: '>7yr'}]
-   var data = {{data|safe}}
+   var data_by_age = {{data_by_age|safe}}
+   var data_outcome = {{data_outcome|safe}}
+   var percentage = {{percentage|safe}}
    // x_labels is an array of all the ages
    var x_labels = {{x_labels|safe}}
    // y_labels is an array of all the outcomes 
    var y_labels = {{y_labels|safe}}
 
-   data.forEach(function(d){
+   percentage.forEach(function(d){
 		// the y0 position (lowest position) for the first stacked bar will be 0 
 		var y0 = 0;
 		// we'll store everything in a list of dictionaries, d.outcomes
@@ -60,17 +105,33 @@
 		 d.total = d.outcomes[d.outcomes.length - 1].y1;
 		   })
 
+    data_by_age.forEach(function(d){
+    // the y0 position (lowest position) for the first stacked bar will be 0 
+    var y0 = 0;
+    // we'll store everything in a list of dictionaries, d.outcomes
+    d.outcomes = y_labels.map(function(name) {
+       // each outcome has a name, a y0 position (it's bottom)
+       // and a y1 position (it's top). 
+       res = {name: name, y0: y0, y1: y0 + d[name]};
+       // and we also have to update y0 for the next rectangle
+       y0 = y0 + d[name];
+       return res;});
+     // we also store the total height for this stacked bar
+     d.total = d.outcomes[d.outcomes.length - 1].y1;
+       })
+
+
    // ----------- EVERY CHART NEEDS SOME SETUP --------------
    //Width and height and margins for the plot 
    var margin = {top: 20, right: 20, bottom: 30, left: 40},
-      width = 960 - margin.left - margin.right,
-      height = 500 - margin.top - margin.bottom;
+      width = 500 - margin.left - margin.right,
+      height = 400 - margin.top - margin.bottom;
    
    // set up the x axis scale to go from 0 to width
    // rangeRoundBands sets up the bar width with no 
    // fractional pixels, and the .1 specifies the distance between bars
    var x_scale = d3.scale.ordinal()
-          .rangeRoundBands([0, width], .1);
+          .rangeRoundBands([0, width], .4);
 
    // this specifies the domain of the x axis, which is ordinal
    x_scale.domain(x_labels);
@@ -81,12 +142,12 @@
 
    // this specifies the domain of the y axis (0 to the height of
    // the tallest bar), which is linear 
-   y_scale.domain([0, d3.max(data, function(d) { return d.total; })]);
+   y_scale.domain([0, 100]);
 
    // set up the color scale (there are 6 outcomes) 
    var color = d3.scale.ordinal()
-          .range(["#C8A57F", "#B0AE6E", "#77BA84", "#29BDBF",
-   "#70B0F1", "#EB88E2"]);
+          .range(["#c7e9c0", "#a1d99b", "#91cf60", "#deebf7",
+   "#fb6a4a", "#fc9272", "#969696", "#bdbdbd"]);
    
    // create the x axis 
    var xAxis = d3.svg.axis()
@@ -102,14 +163,120 @@
    // associate the y labels with the color scale
    color.domain(y_labels);
 
+//------------ LEGEND ----------------
+var legendRectSize = 18;
+var legendSpacing = 4;
+
+var svg = d3.select("#legend_space").append("svg")
+      .attr("width", 300)
+      .attr("height", height + margin.top + margin.bottom);
+
+var legend = svg.selectAll('.legend')
+  .data(color.domain())
+  .enter()
+  .append('g')
+  .attr('class', 'legend')
+  .attr('transform', function(d, i) {
+    var height = legendRectSize + 2 * legendSpacing;
+    var width = 150;
+    var offset =  height * color.domain().length / 2;
+    var horz = 2 * legendRectSize;
+    var vert = i * height + 2 * margin.top;
+    return 'translate(' + horz + ',' + vert + ')';
+  });
+
+  legend.append('rect')
+  .attr('width', legendRectSize)
+  .attr('height', legendRectSize)
+  .style('fill', color)
+  .style('stroke', color);
+
+  legend.append('text')
+  .attr('x', legendRectSize + 2 * legendSpacing)
+  .attr('y', legendRectSize - legendSpacing)
+  .text(function(d) { return d; });
 
 	// ------- D3's DOM MANIPULATION MAGIC GOES HERE -------
     // the svg element is for drawing. We set its size based 
 	// on the margins defined earlier
-	var svg = d3.select("body").append("svg")
-	    .attr("width", width + margin.left + margin.right)
-	    .attr("height", height + margin.top + margin.bottom)
+	var svg = d3.select("#graph3").append("svg")
+	    .attr("width", width + margin.left + margin.right + 200)
+	    .attr("height", height + margin.top + margin.bottom + 50)
 		// and add a group that is inside the margins
+        .append("g")
+          // this makes sure that everything we do inside this group is translated to margin coordinates
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+       // draw the x axis (D3 handles the details in '.call')
+       svg.append("g")
+         .attr("class", "x axis")
+         .attr("transform", "translate(0," + height + ")")
+         .call(xAxis);
+       // draw the y axis (D3 handles the details in '.call')
+       svg.append("g")
+         .attr("class", "y axis")
+         .call(yAxis)
+       .append("text")
+         .attr("transform", "rotate(-90)")
+         .attr("y", 6)
+         .attr("dy", ".71em")
+         .style("text-anchor", "end")
+         .text("Percentage of Animals");
+
+
+
+   // Create a group for each age
+   var age = svg.selectAll(".Age")
+      .data(percentage)
+      .enter()
+      .append("g")
+        .attr("class", "g")
+        .attr("x_position", function(d) {return x_scale(d.Age);})
+        .attr("transform", function(d) {return "translate(" + x_scale(d.Age) + ",0)"; });
+
+   // create a rectangle for each outcome (for each age)
+   age.selectAll("rect")
+   // bind the outcome data for that age to that rectangle
+   .data(function(d) { return d.outcomes; })
+   .enter().append("rect")
+   .attr("width", x_scale.rangeBand())
+   // use the outcome data to determine y position and height
+   .attr("y", function(d) { return y_scale(d.y1); })
+   .attr("height", function(d) { return y_scale(d.y0) - y_scale(d.y1); })
+   // use the color scale to determine the fill color
+   .attr("fill", function(d) { return color(d.name); })
+
+  .on("mouseover", function(d) {
+   //Get this bar's x/y values, then augment for the tooltip
+   var xPosition = parseFloat(d3.select(this.parentNode).attr("x_position")) + x_scale.rangeBand() / 2 + 575;
+   var yPosition = parseFloat(d3.select(this).attr("y")) + 30 + 2 * height + 4* (margin.top + margin.bottom) + 130;
+   // -------------------------tool tip -----------------------
+   //Update the tooltip position and value
+   d3.select("#tooltip")
+       .style("left", xPosition + "px")
+       .style("top", yPosition + "px")
+       .select("#value")
+       .text((d.y1-d.y0).toFixed(2) + "% of animals were " + d.name + ".");
+
+   //Show the tooltip (it's a div that is otherwise always hidden)
+   d3.select("#tooltip").classed("hidden", false);
+  })
+  // and cause it to disappear when the mouse exits 
+  .on("mouseout", function(d) {
+         d3.select("#tooltip").classed("hidden", true)});
+
+//------------- Un normalized bar chart ----------------------
+  y_scale.domain([0, d3.max(data_by_age, function(d) { return d.total; })]);
+
+     // create the y axis
+   var yAxis = d3.svg.axis()
+              .scale(y_scale)
+              .orient("left")
+              .tickFormat(d3.format(".2s"));
+
+  var svg = d3.select("#graph2").append("svg")
+      .attr("width", width + margin.left + margin.right + 200)
+      .attr("height", height + margin.top + margin.bottom + 50)
+    // and add a group that is inside the margins
         .append("g")
           // this makes sure that everything we do inside this group is translated to margin coordinates
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -131,7 +298,7 @@
 
    // Create a group for each age
    var age = svg.selectAll(".Age")
-      .data(data)
+      .data(data_by_age)
       .enter()
       .append("g")
         .attr("class", "g")
@@ -152,25 +319,69 @@
 
   .on("mouseover", function(d) {
    //Get this bar's x/y values, then augment for the tooltip
-   var xPosition = parseFloat(d3.select(this.parentNode).attr("x_position")) + 
-       x_scale.rangeBand() / 2;
-   var yPosition = parseFloat(d3.select(this).attr("y"));
-
+   console.log(this.parentNode);
+   var xPosition = parseFloat(d3.select(this.parentNode).attr("x_position")) + x_scale.rangeBand() / 2 + 575;
+   var yPosition = parseFloat(d3.select(this).attr("y")) + 30 + height + 2* (margin.top + margin.bottom) + 130;
+        
+// -------------------------tool tip -----------------------
    //Update the tooltip position and value
-   d3.select("#tooltip")
+   d3.select("#tooltip2")
        .style("left", xPosition + "px")
        .style("top", yPosition + "px")
        .select("#value")
-       .text(d.y1-d.y0 + " animals were " + d.name + ".");
+       .text((d.y1-d.y0) + " of animals were " + d.name + ".");
 
    //Show the tooltip (it's a div that is otherwise always hidden)
-   d3.select("#tooltip").classed("hidden", false);
+   d3.select("#tooltip2").classed("hidden", false);
 	})
 	// and cause it to disappear when the mouse exits 
 	.on("mouseout", function(d) {
-	       d3.select("#tooltip").classed("hidden", true)});
+	       d3.select("#tooltip2").classed("hidden", true)});
 
+
+  //---------------- ANOTHER GRAPH ------------------------
+  radius = height/2 - 40;
+  var outerRadius = height / 2;
+  var innerRadius = height / 3;
+  var arc = d3.svg.arc()
+      .innerRadius(radius - 40)
+      .outerRadius(radius)
+      .cornerRadius(3);
+
+var pie = d3.layout.pie()
+.padAngle(.02);
+
+color.domain(data_outcome)
+
+  var svg = d3.select("#graph1").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+//Set up groups
+  var arcs = svg.selectAll("g.arc")
+          .data(pie(data_outcome))
+          .enter()
+          .append("g")
+          .attr("class", "arc")
+          .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")")
+ 
+
+  //Draw arc paths
+  arcs.append("path")
+      .attr("fill", function(d, i) {
+        return color(i);
+          })
+      .attr("d", arc);
+
+ arcs.append("text")
+    .attr("transform", function(d) {
+        return "translate(" + arc.centroid(d) + ")";
+    })
+    .attr("text-anchor", "middle")
+    .attr("fill", "#636363")
+    .text(function(d) {return d.data;});
     </script>
-	</div>
 </body>
 </html>

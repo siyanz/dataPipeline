@@ -54,21 +54,34 @@ class MainHandler(BaseHandler):
         # create an 'empty' array storing the number of dogs in each outcome
         
         # specify the outcomes we will search for
-        outcomes = ['Adopted', 'Euthanized', 'Foster', 'Returned to Owner', 'Transferred to Rescue Group', 'Other']
+        outcomes = ['Adopted', 'Foster', 'Returned to Owner', 'Transferred to Rescue Group', 'Euthanized', 'Died', 'Other', 'Unspecified']
         ages = ['<6mo', '6mo-1yr', '1yr-6yr', '>7yr', 'Unspecified']
 
         age_by_outcome = []
+        outcome_perc = []
+        for age in ages:
+            res = {'Age': age, 'sum': 0}
+            for outcome in outcomes:
+                res[outcome] = 0
+            age_by_outcome = age_by_outcome + [res]
+
         for age in ages:
             res = {'Age': age}
             for outcome in outcomes:
                 res[outcome] = 0
-            age_by_outcome = age_by_outcome + [res]
+            outcome_perc = outcome_perc + [res]
+
+        lump_outcome = []
+        for x in range(0, len(outcomes)):
+            lump_outcome.append(0)
 
         # find the column id for ages
         ageid = columns.index(u'EstimatedAge')
         
         # find the column id for outcomes
         outcomeid = columns.index(u'OutcomeType')
+
+        sum_outcome = 0
 
         # loop through each row
         for row in rows: 
@@ -84,14 +97,32 @@ class MainHandler(BaseHandler):
             else: age_position = ages.index('Unspecified')
 
             # if the outcome is a bad value, we call it 'Other' as well
-            if outcome not in outcomes: outcome = 'Other'
+            if (outcome == '') or(outcome == 'NaN'): outcome = 'Unspecified'
+            elif outcome not in outcomes: outcome = 'Other'
 
             # now get the current number of dogs with that outcome and age
             outcomes_for_age = age_by_outcome[age_position]
             # and increase it by one
             outcomes_for_age[outcome] = outcomes_for_age[outcome] + 1
-        logging.info(json.encode(age_by_outcome))
-        context = {'data':json.encode(age_by_outcome),
+            outcomes_for_age["sum"] += 1
+
+            index = outcomes.index(outcome)
+            lump_outcome[index] = lump_outcome[index] + 1
+
+            
+
+        count = 0
+        for elem in age_by_outcome:
+            for elem2 in elem.keys():
+                sum_outcome = 0
+                if elem2 != "Age":
+                    percentage = float(elem[elem2])/float(elem["sum"]) * 100
+                    outcome_perc[count][elem2] = percentage
+            count += 1
+
+        context = {'data_by_age':json.encode(age_by_outcome),
+                    'data_outcome':json.encode(lump_outcome),
+                    'percentage': json.encode(outcome_perc),
                     'y_labels':outcomes,
                     'x_labels':ages}
         # here we call render_response instead of self.response.write.
