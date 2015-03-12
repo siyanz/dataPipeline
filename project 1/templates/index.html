@@ -26,17 +26,72 @@
     <div id="tooltip" class="hidden">
       <p><strong>Twitter id: </strong><span id="tweeter">100</span></p>
       <p><strong>Follower amount: </strong><span id="follower">100</span></p>
+      <p><strong>Following amount: </strong><span id="following">100</span></p>
     </div>
+    <h4>Following/Follower count chart </h4>
+    <p> The size of each circle represents the follower ammount while the inner circle represents the following amount. </p>
+    <p>Tweeter accounts with high following/follower ratio are <span id="highFFR"></span>.</p>
+    <div class="row marketing" style="margin-top: 50px">
+      <div class="col-lg-8" id = "graph1"></div>
+      <div class="col-lg-4" id = "legend_space">
+        </div>
+      </div>
+      <h4>Hierarchical Bundle Chart</h4>
+    <p> This has serious runtime issues. Consider either reducing the edge size or abandon this chart completely. <span style= "color:green">Green</span> line means in degree and <span style="color:red">Red</span> line means out degree.</p>
+      <div class="row marketing" style="margin-top: 50px">
+        <div class="col-lg-8" id = "graph2"></div>
+        <div class="col-lg-4" id = "legend_bundle"></div>
+      </div>
   </div>
 		<script>
 
-var width = 960,
-    height = 960,
+var width = 800,
+    height =800,
     n = 500,
     visible = false,
-    active_node = '';
+    active_node = '',
+    diameter = 700,
+    radius = diameter / 2,
+    innerRadius = radius - 150;
 
-var color = d3.scale.category20();
+var color = d3.scale.ordinal().range(["#3182bd", "#a1d99b"]);
+
+color.domain(["Follower", "Following"]);
+
+//----------------------------LEGEND------------------------------
+var legendRectSize = 18;
+var legendSpacing = 4;
+
+var svg_legend = d3.select("#legend_space").append("svg")
+      .attr("width", 300)
+      .attr("height", height);
+
+var sub_legend = svg_legend.selectAll('.legend')
+  .data(color.domain())
+  .enter()
+  .append('g')
+  .attr('class', 'legend')
+  .attr('transform', function(d, i) {
+    var height = legendRectSize + 2 * legendSpacing;
+    var width = 150;
+    var offset =  height * color.length / 2;
+    var horz = 2 * legendRectSize;
+    var vert = i * height + 2;
+    return 'translate(' + horz + ',' + vert + ')';
+  });
+  
+  sub_legend.append('rect')
+  .attr('width', legendRectSize)
+  .attr('height', legendRectSize)
+  .style('fill', color)
+  .style('stroke', color);
+
+  sub_legend.append('text')
+  .attr('x', legendRectSize + 2 * legendSpacing)
+  .attr('y', legendRectSize - legendSpacing)
+  .text(function(d) { return d; });
+
+//---------------------END LEGEND---------------------------
 
 var force = d3.layout.force()
     .charge(function(d, i) { return i ? -1: -100; })
@@ -44,38 +99,174 @@ var force = d3.layout.force()
     // .linkDistance(100)
     .size([width, height]);
 
-var pie = d3.layout.pie().value(function(d){return d.followersCount/d.followingCount;});
+var pie = d3.layout.pie().value(function(d){return d;})
+.sort(function (a, b) {return b - a;});
 
-
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#graph1").append("svg")
     .attr("width", width)
     .attr("height", height);
 
+
+//--------------------BUNDLE SETUP--------------------------
+var cluster = d3.layout.cluster()
+    .size([360, innerRadius])
+    .sort(null)
+    .value(function(d) { return d.size; });
+
+var bundle = d3.layout.bundle();
+
+var line = d3.svg.line.radial()
+    .interpolate("bundle")
+    .tension(0.85)
+    .radius(function(d) { return d.y; })
+    .angle(function(d) { return d.x / 180 * Math.PI; });
+
+
+var svg_bundle = d3.select("#graph2").append("svg")
+    .attr("width", diameter)
+    .attr("height", diameter)
+  .append("g")
+    .attr("transform", "translate(" + radius + "," + radius + ")");
+
+var link_bundle = svg_bundle.append("g").selectAll(".link_bundle"),
+    node_bundle = svg_bundle.append("g").selectAll(".node_bundle");
+
+//------------------ END BUNDLE SETUP --------------------------
+
 d3.json("data/d3data.json", function(error, graph) {
-  force
-      .nodes(graph.nodes)
-      // .links(graph.links)
-      .start();
+  var new_nodes = convert(graph.nodes)[0],
+    nodes = cluster.nodes(packageHierarchy(graph.nodes)),
+    links = packageImports(nodes, graph.links),
+    highFF_nodes = convert(graph.nodes)[1];
 
-  var root = graph.nodes[0];
-  root.fixed = true;
+console.log(highFF_nodes);
 
-  var loading = svg.append("text")
+  var loading = svg_bundle.append("text")
     .attr("x", width / 2)
     .attr("y", height / 2)
     .attr("dy", ".35em")
     .style("text-anchor", "middle")
     .text("Simulating. One moment please…");
-  // Use a timeout to allow the rest of the page to load first.
-  setTimeout(function() {
 
+//---------- LIST NODES with high following/follower ratio-------
+document.getElementById("highFFR").innerHTML = highFF_nodes;
+
+//------------------ BUNDLE CHART ----------------------
+  link_bundle = link_bundle
+    .data(bundle(links))
+  .enter().append("path")
+    .each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
+    .attr("class", "link_bundle")
+    .attr("d", line);
+
+  node_bundle = node_bundle
+    .data(nodes.filter(function(n) { return !n.children; }))
+    .enter().append("text")
+    .attr("class", "node_bundle")
+    .attr("dy", ".1em")
+    .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
+    .style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+    .style("font-weight", function(d) {
+      if (d.followersCount > 100000) {
+        return "bold";
+      }
+    })
+    .style("font-size", function(d) {
+      if (d.followersCount > 100000) {
+        return "12px";
+      }
+    })
+    .text(function(d, i) { 
+      if (d.followersCount > 100000){
+        return d.userName; 
+      } else{
+        if (i % 4 == 2) return d.userName;
+      }})
+    .style("fill", "#bbb")
+    .on("mouseover", mouseovered)
+    .on("mouseout", mouseouted);
+
+    loading.remove();
+
+function mouseovered(d) {
+  node_bundle
+      .each(function(n) { n.target = n.source = false; });
+
+  link_bundle
+      .classed("link--target", function(l) { if (l.target === d) return l.source.source = true; })
+      .classed("link--source", function(l) { if (l.source === d) return l.target.target = true; })
+    .filter(function(l) { return l.target === d || l.source === d; })
+      .each(function() { this.parentNode.appendChild(this); });
+
+}
+
+function mouseouted(d) {
+  link_bundle
+      .classed("link--target", false)
+      .classed("link--source", false);
+}
+
+d3.select(self.frameElement).style("height", diameter + "px");
+
+var count = 0;
+// Lazily construct the package hierarchy from class names.
+function packageHierarchy(classes) {
+  var map = {};
+  function find(name, data) {
+    var node = map[name];
+    if (!node) {
+      node = map[name] = data || {name: name, children: []};
+      if (name){
+          node.parent = find("");
+          node.parent.children.push(node);
+          node.key = name;
+        } 
+    } 
+    return node;
+  }
+
+  classes.forEach(function(d) {
+    find(d.userId, d);
+  });
+
+  return map[""];
+}
+
+// Return a list of imports for the given array of nodes.
+function packageImports(nodes, links) {
+  var map = {},
+      imports = [];
+
+  // Compute a map from name to node.
+  nodes.forEach(function(d) {
+    map[d.userName] = d;
+  });
+
+  // For each import, construct a link from the source to target node.
+  links.forEach(function(d) {
+    var s = d.source,
+      t = d.target;
+
+    imports.push({source: nodes[s], target: nodes[t]});
+    });
+  return imports;
+}
+
+//------------------- BUBBLE CHART ---------------------
+  force
+      .nodes(new_nodes)
+      // .links(graph.links)
+      .start();
+
+  var root = new_nodes[0];
+  root.fixed = true;
 
   var node = svg.selectAll(".node")
-      .data(graph.nodes.slice(1))
-    .enter().append("circle")
+      .data(new_nodes)
+      .enter().append("circle")
       .attr("class", "node")
-      .attr("r", function(d) { return Math.sqrt(d.followersCount/100);})
-      .style("fill", function(d) { return color(d.group); })
+      .attr("r", function(d) { return d.r; })
+      .style("fill", function(d) { return color(0); })
       // .call(node_drag)
       .on("click", function(d) { 
         var xPos = d3.event.pageX;
@@ -91,6 +282,10 @@ d3.json("data/d3data.json", function(error, graph) {
           .select("#follower")
           .text(d.followersCount);
 
+        d3.select("#tooltip")
+          .select("#following")
+          .text(d.followingCount);
+
         /*--- if clicked node is different from the one previously, reopen tooltip for the new node by setting visible to false --- */
         if (active_node != d.userName){
           visible = false;
@@ -102,33 +297,98 @@ d3.json("data/d3data.json", function(error, graph) {
           d3.select("#tooltip").classed("hidden", false)
           visible = true;
         } else {
-          console.log(tooltip.style.display)
           d3.select("#tooltip").classed("hidden", true)
           visible = false;
         }
 
       });
 
-  loading.remove();
+  var innerC = svg.selectAll("svg")
+      .data(new_nodes)
+    .enter().append("circle")
+      .attr("class", "inner_node")
+      .attr("r", function(d) { return d.r*(d.followingCount/d.followersCount); })
+      .style("fill", function(d) { return color(1); })
+      .on("click", function(d) { 
+        var xPos = d3.event.pageX;
+        var yPos = d3.event.pageY;
+
+        d3.select("#tooltip")
+          .style("left", xPos +"px")
+          .style("top", yPos + "px")
+          .select("#tweeter")
+          .text(d.userName);
+
+        d3.select("#tooltip")
+          .select("#follower")
+          .text(d.followersCount);
+
+        d3.select("#tooltip")
+          .select("#following")
+          .text(d.followingCount);
+
+        /*--- if clicked node is different from the one previously, reopen tooltip for the new node by setting visible to false --- */
+        if (active_node != d.userName){
+          visible = false;
+        }
+        active_node = d.userName;
+
+        /*--- toggle tooltip ---*/
+        if (visible == false){
+          d3.select("#tooltip").classed("hidden", false)
+          visible = true;
+        } else {
+          d3.select("#tooltip").classed("hidden", true)
+          visible = false;
+        }
+
+      });
+
 
   function tick(){
-    node.attr("cx", function(d) { return d.x; })
-        .attr("cy", function(d) { return d.y; });
-    // link.attr("x1", function(d) { return d.source.x; })
-    //     .attr("y1", function(d) { return d.source.y; })
-    //     .attr("x2", function(d) { return d.target.x; })
-    //     .attr("y2", function(d) { return d.target.y; });
-  }
+    var node_x = 0;
+    var node_y = 0;
+    node.attr("cx", function(d) { node_x = d.x; return d.x; })
+        .attr("cy", function(d) { node_y = d.y;return d.y; });
+    innerC.attr("cx", function(d) { node_x = d.x; return d.x; })
+        .attr("cy", function(d) { node_y = d.y;return d.y; });
+  };
+
+  loading.remove();
 
  force.on("tick", function ticky(e){
-  var q = d3.geom.quadtree(graph.nodes),
+  var q = d3.geom.quadtree(new_nodes),
       i = 0,
-      n = graph.nodes.length;
-  while (++i < n) q.visit(collide(graph.nodes[i]));
+      n = new_nodes.length;
+  while (++i < n) q.visit(collide(new_nodes[i]));
   
   tick();
-
  });
+
+ function convert(node_list){
+  var result = [];
+  var highFF = []
+  var current_node = {};
+
+  count = 0;
+
+  while (++count<node_list.length){
+      //----- for bubble chart ------
+      current_node = node_list[count];
+      current_node.r = Math.sqrt(current_node.followersCount/100);
+      // var followingR = current_node.followingCount/(current_node.followersCount+current_node.followingCount);
+      var followingR = current_node.followingCount/current_node.followersCount;
+      // var followerR = 1 - followingR;
+      // current_node.FFratio = [followingR, followerR];
+      result.push(current_node);
+
+      //------ for high following/follower ratio----
+      if (followingR > 0.6){
+        highFF.push(current_node.userName);
+      }
+  };
+  return [result, highFF];
+ };
 
  function collide(node) {
   var node_r = Math.sqrt(node.followersCount/100),
@@ -153,10 +413,9 @@ d3.json("data/d3data.json", function(error, graph) {
     }
     return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
   };
+};
+//----------------- END BUBBLE CHART -----------------
 
-    
-    };
-  });
 });
 
     </script>

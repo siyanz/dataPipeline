@@ -7,12 +7,6 @@ body {
   stroke-width: 1.5px;
 }
 
-.link {
-  stroke: #999;
-  stroke-opacity: .6;
-  stroke-width: 1;
-}
-
 .tooltip, .tooltip2 {
     text-anchor: middle;
     font-family: sans-serif;
@@ -45,4 +39,52 @@ body {
         font-family: sans-serif;
         font-size: 16px;
         line-height: 20px;
+}
+
+
+rect {
+        -moz-transition: all 0.3s;
+        -o-transition: all 0.3s;
+        -webkit-transition: all 0.3s;
+        transition: all 0.3s;
+}
+
+rect:hover {
+        fill: orange;
+}
+
+#legend_space {
+    padding-top: 100px;
+}
+
+/* For hierarchical graph */
+.link_bundle {
+  stroke: steelblue;
+  stroke-opacity: .4;
+  fill: none;
+  pointer-events: none;
+}
+
+.node_bundle:hover{
+  fill: #2ca02c;
+}
+
+.node--source {
+  fill: #2ca02c;
+}
+
+.node--target {
+  fill: #d62728;
+}
+
+.link--source{
+  stroke-opacity: 1;
+  stroke-width: 2px;
+  stroke: #2ca02c;
+}
+
+.link--target {
+  stroke-opacity: 1;
+  stroke-width: 2px;
+  stroke: #d62728;
 }
