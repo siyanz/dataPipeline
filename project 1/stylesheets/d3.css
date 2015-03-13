@@ -61,9 +61,10 @@ rect:hover {
 .node_bundle:hover {
   font-weight: bold ;
 }
+
 .link_bundle {
   stroke: #bdbdbd;
-  stroke-opacity: .3;
+  stroke-opacity: .1;
   fill: none;
   pointer-events: none;
 }

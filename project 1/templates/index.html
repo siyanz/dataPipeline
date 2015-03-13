@@ -135,7 +135,7 @@ var bundle = d3.layout.bundle();
 
 var line = d3.svg.line.radial()
     .interpolate("bundle")
-    .tension(0.85)
+    .tension(0.7)
     .radius(function(d) { return d.y; })
     .angle(function(d) { return d.x / 180 * Math.PI; });
 
@@ -272,9 +272,6 @@ function packageImports(nodes, links) {
     });
   return imports;
 }
-//---------- LIST NODES with high following/follower ratio-------
-document.getElementById("highFFR").innerHTML = highFF_nodes;
-
 
 //------------------- BUBBLE CHART ---------------------
   force
