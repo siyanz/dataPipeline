@@ -1,4 +1,4 @@
-application: project1
+application: project1-isistweet
 version: 1-1
 runtime: python27
 api_version: 1

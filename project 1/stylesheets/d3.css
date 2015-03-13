@@ -37,7 +37,7 @@ body {
 #tooltip p, #tooltip2 p {
         margin: 0;
         font-family: sans-serif;
-        font-size: 16px;
+        font-size: 12px;
         line-height: 20px;
 }
 
@@ -57,34 +57,26 @@ rect:hover {
     padding-top: 100px;
 }
 
-/* For hierarchical graph */
+/* For bundle graph */
+.node_bundle:hover {
+  font-weight: bold ;
+}
 .link_bundle {
-  stroke: steelblue;
-  stroke-opacity: .4;
+  stroke: #bdbdbd;
+  stroke-opacity: .3;
   fill: none;
   pointer-events: none;
 }
 
-.node_bundle:hover{
-  fill: #2ca02c;
-}
-
-.node--source {
-  fill: #2ca02c;
-}
-
-.node--target {
-  fill: #d62728;
-}
 
 .link--source{
   stroke-opacity: 1;
   stroke-width: 2px;
-  stroke: #2ca02c;
+  stroke: #43a2ca;
 }
 
 .link--target {
   stroke-opacity: 1;
   stroke-width: 2px;
-  stroke: #d62728;
+  stroke: #a8ddb5;
 }

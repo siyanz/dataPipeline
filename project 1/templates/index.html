@@ -27,10 +27,11 @@
       <p><strong>Twitter id: </strong><span id="tweeter">100</span></p>
       <p><strong>Follower amount: </strong><span id="follower">100</span></p>
       <p><strong>Following amount: </strong><span id="following">100</span></p>
+      <p><strong>Most recent tweet: </strong><span id="tweet">100</span></p>
     </div>
     <h4>Following/Follower count chart </h4>
-    <p> The size of each circle represents the follower ammount while the inner circle represents the following amount. </p>
-    <p>Tweeter accounts with high following/follower ratio are <span id="highFFR"></span>.</p>
+    <p> The size of each circle represents the total follower and following amount while the inner circle represents the following amount. Circles with a <span style="color:red">red</span> outline were suspended in March, 2015.</p>
+    <p>It seems that the amount of followers one has is not a good indicator of it being a part of the ISIS propaganda network. Rather, the ratio of follower/following amount might be a better indicator, as seen the majority of the suspended accounts have a relatively large inner circle in the plot. Hence, the ratio should be considered if we want to predict accounts that will be radicalized in the future. </p>
     <div class="row marketing" style="margin-top: 50px">
       <div class="col-lg-8" id = "graph1"></div>
       <div class="col-lg-4" id = "legend_space">
@@ -49,14 +50,12 @@ var width = 800,
     height =800,
     n = 500,
     visible = false,
-    active_node = '',
-    diameter = 700,
-    radius = diameter / 2,
-    innerRadius = radius - 150;
+    active_node = '';
 
-var color = d3.scale.ordinal().range(["#3182bd", "#a1d99b"]);
-
+var color = d3.scale.ordinal().range(["#43a2ca", "#a8ddb5"]);
+var color_bundle = d3.scale.ordinal().range(["#43a2ca", "#a8ddb5"]);
 color.domain(["Follower", "Following"]);
+color_bundle.domain(["Being followed", "Following others"])
 
 //----------------------------LEGEND------------------------------
 var legendRectSize = 18;
@@ -64,7 +63,7 @@ var legendSpacing = 4;
 
 var svg_legend = d3.select("#legend_space").append("svg")
       .attr("width", 300)
-      .attr("height", height);
+      .attr("height", 100);
 
 var sub_legend = svg_legend.selectAll('.legend')
   .data(color.domain())
@@ -91,23 +90,42 @@ var sub_legend = svg_legend.selectAll('.legend')
   .attr('y', legendRectSize - legendSpacing)
   .text(function(d) { return d; });
 
+//----------------------LEGEND FOR BUNDLE ----------------
+var svg_legend_bundle = d3.select("#legend_bundle").append("svg")
+      .attr("width", 300)
+      .attr("height", 100);
+
+var sub_legend_bundle = svg_legend_bundle.selectAll('.legend')
+  .data(color_bundle.domain())
+  .enter()
+  .append('g')
+  .attr('class', 'legend')
+  .attr('transform', function(d, i) {
+    var height = legendRectSize + 2 * legendSpacing;
+    var width = 150;
+    var offset =  height * color.length / 2;
+    var horz = 2 * legendRectSize;
+    var vert = i * height + 2;
+    return 'translate(' + horz + ',' + vert + ')';
+  });
+  
+  sub_legend_bundle.append('rect')
+  .attr('width', legendRectSize)
+  .attr('height', legendRectSize)
+  .style('fill', color)
+  .style('stroke', color);
+
+  sub_legend_bundle.append('text')
+  .attr('x', legendRectSize + 2 * legendSpacing)
+  .attr('y', legendRectSize - legendSpacing)
+  .text(function(d) { return d; });
 //---------------------END LEGEND---------------------------
 
-var force = d3.layout.force()
-    .charge(function(d, i) { return i ? -1: -100; })
-    .gravity(0.1)
-    // .linkDistance(100)
-    .size([width, height]);
-
-var pie = d3.layout.pie().value(function(d){return d;})
-.sort(function (a, b) {return b - a;});
-
-var svg = d3.select("#graph1").append("svg")
-    .attr("width", width)
-    .attr("height", height);
-
-
 //--------------------BUNDLE SETUP--------------------------
+var diameter = 800,
+    radius = diameter / 2,
+    innerRadius = radius - 150;
+
 var cluster = d3.layout.cluster()
     .size([360, innerRadius])
     .sort(null)
@@ -133,13 +151,26 @@ var link_bundle = svg_bundle.append("g").selectAll(".link_bundle"),
 
 //------------------ END BUNDLE SETUP --------------------------
 
-d3.json("data/d3data.json", function(error, graph) {
-  var new_nodes = convert(graph.nodes)[0],
-    nodes = cluster.nodes(packageHierarchy(graph.nodes)),
-    links = packageImports(nodes, graph.links),
-    highFF_nodes = convert(graph.nodes)[1];
+//---------------- BUBBLE CHART SETUP ---------------------------
+var force = d3.layout.force()
+    .charge(function(d, i) { return i ? -1: -100; })
+    .gravity(0.1)
+    // .linkDistance(100)
+    .size([width, height]);
 
-console.log(highFF_nodes);
+var pie = d3.layout.pie().value(function(d){return d;})
+.sort(function (a, b) {return b - a;});
+
+var svg = d3.select("#graph1").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+//---------------- END BUBBLE CHART SETUP -------------------------
+
+d3.json("data/d3data-100.json", function(error, graph) {
+  var new_nodes = convert(graph.nodes)[0],
+    highFF_nodes = convert(graph.nodes)[1];
+  var nodes = cluster.nodes(packageHierarchy(graph.nodes)),
+    links = packageImports(nodes, graph.links);
 
   var loading = svg_bundle.append("text")
     .attr("x", width / 2)
@@ -148,8 +179,6 @@ console.log(highFF_nodes);
     .style("text-anchor", "middle")
     .text("Simulating. One moment please…");
 
-//---------- LIST NODES with high following/follower ratio-------
-document.getElementById("highFFR").innerHTML = highFF_nodes;
 
 //------------------ BUNDLE CHART ----------------------
   link_bundle = link_bundle
@@ -166,23 +195,14 @@ document.getElementById("highFFR").innerHTML = highFF_nodes;
     .attr("dy", ".1em")
     .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
     .style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
-    .style("font-weight", function(d) {
-      if (d.followersCount > 100000) {
-        return "bold";
+    .text(function(d, i) {return d.userName;})
+    .style("fill", function(d) {
+      if (d.suspended == true) {
+        return "#de2d26";
+      } else {
+        return "#bbb";
       }
     })
-    .style("font-size", function(d) {
-      if (d.followersCount > 100000) {
-        return "12px";
-      }
-    })
-    .text(function(d, i) { 
-      if (d.followersCount > 100000){
-        return d.userName; 
-      } else{
-        if (i % 4 == 2) return d.userName;
-      }})
-    .style("fill", "#bbb")
     .on("mouseover", mouseovered)
     .on("mouseout", mouseouted);
 
@@ -193,7 +213,9 @@ function mouseovered(d) {
       .each(function(n) { n.target = n.source = false; });
 
   link_bundle
-      .classed("link--target", function(l) { if (l.target === d) return l.source.source = true; })
+      .classed("link--target", function(l) { 
+        console.log(l.target);
+        if (l.target === d) return l.source.source = true; })
       .classed("link--source", function(l) { if (l.source === d) return l.target.target = true; })
     .filter(function(l) { return l.target === d || l.source === d; })
       .each(function() { this.parentNode.appendChild(this); });
@@ -228,7 +250,6 @@ function packageHierarchy(classes) {
   classes.forEach(function(d) {
     find(d.userId, d);
   });
-
   return map[""];
 }
 
@@ -251,6 +272,9 @@ function packageImports(nodes, links) {
     });
   return imports;
 }
+//---------- LIST NODES with high following/follower ratio-------
+document.getElementById("highFFR").innerHTML = highFF_nodes;
+
 
 //------------------- BUBBLE CHART ---------------------
   force
@@ -267,49 +291,26 @@ function packageImports(nodes, links) {
       .attr("class", "node")
       .attr("r", function(d) { return d.r; })
       .style("fill", function(d) { return color(0); })
+      .style("stroke", function(d) {
+        if (d.suspended == true){
+          return "#de2d26";
+        }
+      })
       // .call(node_drag)
-      .on("click", function(d) { 
-        var xPos = d3.event.pageX;
-        var yPos = d3.event.pageY;
-
-        d3.select("#tooltip")
-          .style("left", xPos +"px")
-          .style("top", yPos + "px")
-          .select("#tweeter")
-          .text(d.userName);
-
-        d3.select("#tooltip")
-          .select("#follower")
-          .text(d.followersCount);
-
-        d3.select("#tooltip")
-          .select("#following")
-          .text(d.followingCount);
-
-        /*--- if clicked node is different from the one previously, reopen tooltip for the new node by setting visible to false --- */
-        if (active_node != d.userName){
-          visible = false;
-        }
-        active_node = d.userName;
-
-        /*--- toggle tooltip ---*/
-        if (visible == false){
-          d3.select("#tooltip").classed("hidden", false)
-          visible = true;
-        } else {
-          d3.select("#tooltip").classed("hidden", true)
-          visible = false;
-        }
-
-      });
+      .on("click", function(d) { display_tip(d); });
 
   var innerC = svg.selectAll("svg")
       .data(new_nodes)
     .enter().append("circle")
       .attr("class", "inner_node")
-      .attr("r", function(d) { return d.r*(d.followingCount/d.followersCount); })
+      .attr("r", function(d) { 
+        var ratio = d.followingCount/d.followersCount;
+        var innerR = d.r*(ratio/(1+ratio));
+        return innerR; })
       .style("fill", function(d) { return color(1); })
-      .on("click", function(d) { 
+      .on("click", function(d) { display_tip(d); });
+
+  function display_tip(d){
         var xPos = d3.event.pageX;
         var yPos = d3.event.pageY;
 
@@ -327,6 +328,10 @@ function packageImports(nodes, links) {
           .select("#following")
           .text(d.followingCount);
 
+        d3.select("#tooltip")
+          .select("#tweet")
+          .text(d.tweets);
+
         /*--- if clicked node is different from the one previously, reopen tooltip for the new node by setting visible to false --- */
         if (active_node != d.userName){
           visible = false;
@@ -341,9 +346,7 @@ function packageImports(nodes, links) {
           d3.select("#tooltip").classed("hidden", true)
           visible = false;
         }
-
-      });
-
+  }
 
   function tick(){
     var node_x = 0;
@@ -375,7 +378,8 @@ function packageImports(nodes, links) {
   while (++count<node_list.length){
       //----- for bubble chart ------
       current_node = node_list[count];
-      current_node.r = Math.sqrt(current_node.followersCount/100);
+      current_node.r = 
+      Math.sqrt(Math.sqrt((current_node.followersCount+current_node.followersCount)/10000));
       // var followingR = current_node.followingCount/(current_node.followersCount+current_node.followingCount);
       var followingR = current_node.followingCount/current_node.followersCount;
       // var followerR = 1 - followingR;
@@ -391,7 +395,7 @@ function packageImports(nodes, links) {
  };
 
  function collide(node) {
-  var node_r = Math.sqrt(node.followersCount/100),
+  var node_r = node.r,
       r = node_r + 100,
       nx1 = node.x - r,
       nx2 = node.x + r,
@@ -402,7 +406,7 @@ function packageImports(nodes, links) {
       var x = node.x - quad.point.x,
           y = node.y - quad.point.y,
           l = Math.sqrt(x * x + y * y),
-          r = node_r + Math.sqrt(quad.point.followersCount/100);
+          r = node_r + quad.point.r;
       if (l < r) {
         l = (l - r) / l * .5;
         node.x -= x *= l;
@@ -415,6 +419,13 @@ function packageImports(nodes, links) {
   };
 };
 //----------------- END BUBBLE CHART -----------------
+
+});
+
+
+
+d3.json("data/d3data-100.json", function(error, classes) {
+
 
 });
 
