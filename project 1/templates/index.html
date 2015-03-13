@@ -30,15 +30,21 @@
       <p><strong>Most recent tweet: </strong><span id="tweet">100</span></p>
     </div>
     <h4>Following/Follower count chart </h4>
+    <br>
+    <h5 style="font-weight:bold">Data Quality</h5>
+    <p>While cleaning and visualizing the data, we found a few data points with incomplete information, such as missing tweeter usernames and following/follower accounts information. In this particular visualization, nodes with all but one piece of information present are disgarded. </p>
+    <p style="font-weight:bold">Chart Interpretation</p>
     <p> The size of each circle represents the total follower and following amount while the inner circle represents the following amount. Circles with a <span style="color:red">red</span> outline were suspended in March, 2015.</p>
     <p>It seems that the amount of followers one has is not a good indicator of it being a part of the ISIS propaganda network. Rather, the ratio of follower/following amount might be a better indicator, as seen the majority of the suspended accounts have a relatively large inner circle in the plot. Hence, the ratio should be considered if we want to predict accounts that will be radicalized in the future. </p>
+
     <div class="row marketing" style="margin-top: 50px">
       <div class="col-lg-8" id = "graph1"></div>
       <div class="col-lg-4" id = "legend_space">
         </div>
       </div>
       <h4>Hierarchical Bundle Chart</h4>
-    <p> This has serious runtime issues. Consider either reducing the edge size or abandon this chart completely. <span style= "color:green">Green</span> line means in degree and <span style="color:red">Red</span> line means out degree.</p>
+      <br>
+    <p>This chart shows how these 100 people interact with each other. </p>
       <div class="row marketing" style="margin-top: 50px">
         <div class="col-lg-8" id = "graph2"></div>
         <div class="col-lg-4" id = "legend_bundle"></div>
