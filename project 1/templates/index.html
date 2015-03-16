@@ -41,16 +41,17 @@
     </div>
     <h3 id="intro">Introduction</h3>
     <p>The shocking and powerful rise of the pseudo-state often referred to as ISIS has been marked by exceptional use of social media to recruit and organize fighters.  This propaganda campaign has revealed a new type of spiritual authority we will refer to as “disseminators”.  These “disseminators” are not overtly involved in facilitating the flow of foreign fighters into Syria and Iraq, but their statements and interactions can be seen as providing encouragement and religious legitimacy to the cause.[1]</p>
-    <p>This project will pull data from the Twitter REST API[2] , conduct a network analysis in ORA [3], and provide the user with data visualizations that focus on answering the following questions:</p>
+    <p>This project will analyze data from the Twitter REST API[2] , conduct a network analysis in ORA [3], and provide the user with data visualizations that focus on answering the following questions:</p>
     <ul>
       <li>How large is the ISIS propaganda network on Twitter?</li>
-      <li> Can we search for and identify its members?</li>
+      <li>Can we search for and identify its members?</li>
       <li>Can we identify the relative importance of its members?</li>
     </ul>
     <hr>
     <h3 id="data"></a>Data</h3>
     <div class="row marketing">
       <div class="col-lg-6">
+        <p>We develop our dataset by conducting a two step snowball sample of the Twitter public commons API.  We use 5 'seed agents' or known ISIS supporters to develop our search. Our seed agents for the current analysis are pictured to the right.</p>
         <p>Snowball sample the Twitter API on 12/7/2014.</p>
     <ul>
       <li>S0 = { ShamiWitness, SaqrAnsaar, AbuSiqr, JabhtAnNusrah_s, Khalid_Maqdisi }</li>
@@ -61,7 +62,7 @@
      <div class="col-lg-6">
       <figure>
       <img src="image/Figure1.png" style="width: 100%">
-      <figcaption>Displays the top 5, still active disseminator accounts identified in the ICSR #Greenbirds Report [1]
+      <figcaption>Displays the top 5, still active as of 12/2/2014 disseminator accounts identified in the ICSR #Greenbirds Report [1]
 </figcaption>
       </figure>
      </div>
@@ -69,15 +70,15 @@
     <hr>
 <h3 id="result"></a>Results</h3>
 <h4> How large is the ISIS propaganda network on Twitter?</h4>
-<p>As with most covert networks, bounding the network and estimating size is non-trivial.  News media has estimated the size to be between 5000 and 45000 users.  Due to the difficulty of discriminating between news media, bloggers, and propagandists. We cannot estimate the size of the ISIS propaganda network at this time.  However, we have been able to identify a core cluster of propagandists, and this interactive visualization will facilitate supervised learning in the future to classify network members and estimate overall size of the true network.  
+<p>As with most covert networks, bounding the network and estimating size is non-trivial.  News media has estimated the size to be between 5000 and 45000 users.  Due to the difficulty of discriminating between news media, bloggers, and propagandists, we currently cannot estimate the size of the ISIS propaganda network. However, we have been able to identify a core cluster of propagandists, and this interactive visualization will facilitate a semi-supervised learning algorithm to remove false positives and properly scope the network.  We have found that often times when the end user can view the a specific Twitter user's account, they can quickly identify whether the individual is of interest.  This interface will leverage the ephemeral features from the Twitter account profile to feed the rich features provided in our dataset to a learning classification algorithm.   
 </p>
 <h4>Can we search for and identify its members?</h4>
-<p>The data cleaning process we went through reduced the original network down to 100 tweeter handles. On 3/1/2015 Twitter suspended approximately 2000 accounts it claimed were spreading ISIS propaganda[5].  3.98% or 6606 of the 123,532 accounts identified in our snowball sample have been deleted or suspended as of 3/12/2015.  52 of our “Top 100 cluster” have been suspended which indicates our clusters and the cleaning process can help us search for members in the ISIS propaganda network, albeit not perfect.</p>
-<p>Of the 100 people, we try to identify what are some features of ISIS propaganda members by comparing the accounts that were suspended and that were not.</p>
+<p>In the data cleaning process we went reduced the initial results of our snowball search from 123k nodes to a cluster of interest containing 6000 nodes.  From that 6000, we used centrality measures to identify our top 100 Twitter users. Our initial results looks promising. On 3/1/2015 Twitter suspended approximately 2000 accounts it claimed were spreading ISIS propaganda[5].  3.98% or 6606 of the 123,532 accounts identified in our snowball sample have been deleted or suspended as of 3/12/2015.  52 of our “Top 100 cluster” have been suspended which indicates our clusters and the cleaning process can help us search for members in the ISIS propaganda network.</p>
+<p>Of our top 100 users, we try to identify discriminating features will help improve recall and precision.  We use Twitter's account suspensions to help inform our process.</p>
 <br>
     <h5>Following/Follower count chart </h5>
-    <p> <span style="font-weight: bold">The size of each circle represents the total amount of followers one has </span> and the inner circle represents the following account amount. Circles with a <span style="color:red">red</span> outline were suspended in March, 2015.</p>
-    <p>It seems that the amount of followers one has is not a good indicator of it being a part of the ISIS propaganda network. Rather, the ratio of follower/following amount might be a better indicator, as seen the majority of the suspended accounts have a relatively large inner circle in the plot. Hence, the ratio should be considered if we want to predict accounts that will be radicalized in the future. </p>
+    <p> <span style="font-weight: bold">The size of each circle depicts a user's follower count</span> , while the inner circle depicts the number of accounts the user is following. Circles with a <span style="color:red">red</span> outline were suspended in March, 2015.</p>
+    <p>This visualization is helpful in two ways.  First it implies that while follower count does not necessarily provide useful information for our algorithm, the relationship between follower and following counts does.  Note the majority of the suspended accounts have a relatively large inner circle in the plot. Furthermore, when the end user selects a given node, he/she can gain some context into why or why not that node has been selected.  For example, some of the larger nodes are legitimate religious accounts that happen to be followed by many of our propagandists.  Hence, our algorithm will need to learn how to discriminate between these types of users.</p>
 
     <div class="row marketing" style="margin-top: 50px">
       <div class="col-lg-8" id = "graph1"></div>
@@ -85,15 +86,15 @@
         </div>
       </div>
       <h5>Hierarchical Bundle Chart</h5>
-    <p>This chart shows how these 100 people interact with each other. By scrolling through the 100 people and looking at their connections, intuitively, it seems that the visualization tells that if one has more connections (whether it's following or being followed) with people who are considered as a propoganda member, they are more likely to be considered as a member and, hence, has its account suspended. </p>
-    <p>So we decided to look at if this is true.</p>
+    <p>This chart allows and end user to explore how our top 100 accounts are related with one another. Users with red letters represent the same suspended accounts circled in red in the Following/Follower Count Chart.  By selecting a screen name and looking at connections, intuitively, it seems that the visualization tells that if a user is following and followed by suspended accounts, he/she is more likely to be suspended. </p>
+   
       <div class="row marketing" style="margin-top: 50px">
         <div class="col-lg-8" id = "graph2"></div>
         <div class="col-lg-4" id = "legend_bundle"></div>
       </div>
   <h5>Bar chart of suspended followers and following accounts</h5>
-  <p>This chart plots, for each tweet account, how many of its followers and following accounts that are within the top 100 were suspended. This might be an indicator of whether or not the account belongs to a member of a ISIS propaganda network.</p>
-  <p>From the chart, it seems that the suspended accounts had more followers/following accounts that are suspended. That is, if an account is following or is followed by many accounts that were suspended, this particular account is more likely to be part of the propaganda network.</p>
+  <p>This chart plots the in-degree centrality  (number of followers within our top 100) and out-degree centrality (number of members of our top 100 the user is following). Our 52 suspended accounts are labelled in red and to the right side of the horizontal axis. Again, this metric looks informative as a feature in a machine learning application.</p>
+  <p>The mass depicted to the right side of the plot again indicates taht centrality within our top 100 users is correlated with account suspension.  This further validates a blended approach to our problem that utilizes network analytics and the rich features in our data though a machine learning classifier.</p>
   <div class="row marketing" style="margin-top: 50px">
         <div class="col-lg-8" id = "graph3"></div>
       <div class="col-lg-4" id = "legend_space"></div>
@@ -114,14 +115,13 @@
 
    <hr>
    <h3 id="future">Future Research</h3>
-   <p>We would want to develop a more informed clustering algorithm by:</p>
+   <p>We would want to develop a supervised or semi-supervised learning algorithm that builds more informed clusters by:</p>
    <ul>
-     <li>  better leveraging the information provided by the Twitter REST API such as: retweets, mentions.</li>
-     <li>identify and label news media and official accounts.</li>
-     <li> identify and label all suspended accounts.</li>
+     <li>  Enables a user to classify accounts manually to provide labelled data.</li>
+      <li>  Labelled data will enable us to leverage the information provided by the Twitter REST API such as: retweets, mentions, geotags, as well as the network characteristics provided by our initial model in ORA.</li>
    </ul>
-<p>The problem lends itself to a visualization that capitalizes on the ability of the user to classify user accounts and facilitate a machine learning algorithm for clustering.</p>
-<p>Another question of our interest is to identify a populations of users in the early phases of being radicalized.</p>
+<p> Ultimately the learning algorithm will help remove false positives and provide better characteristics and understanding of network to include key users and clusters of users.  Our interface will facilitatehuman-computer interaction that leverages the strengths of both.</p>
+<p>It is also likely that we will be able to identify other populations of interest once our network is fully cleaned.  For example, there will be identifiable clusters within the network.  Some of them may be aggregated geospatially.  There may be a population that follows many of our propagandists, but is not followed by many of them.  Could this population contain individuals at risk of radicalization?  The rich information contained in the combination of network characteristics and Twitter data offer novel insight into this covert group.</p>
   
   <hr>
   <h3>References</h3>
@@ -137,26 +137,21 @@
   </div>
   </footer>
 		<script>
-
 var width = 800,
     height =800,
     n = 500,
     visible = false,
     active_node = '';
-
 var color = d3.scale.ordinal().range(["#43a2ca", "#a8ddb5"]);
 var color_bundle = d3.scale.ordinal().range(["#43a2ca", "#a8ddb5"]);
 color.domain(["Follower", "Following"]);
 color_bundle.domain(["Being followed", "Following others"])
-
 //----------------------------LEGEND------------------------------
 var legendRectSize = 18;
 var legendSpacing = 4;
-
 var svg_legend = d3.select("#legend_space").append("svg")
       .attr("width", 300)
       .attr("height", 100);
-
 var sub_legend = svg_legend.selectAll('.legend')
   .data(color.domain())
   .enter()
@@ -176,17 +171,14 @@ var sub_legend = svg_legend.selectAll('.legend')
   .attr('height', legendRectSize)
   .style('fill', color)
   .style('stroke', color);
-
   sub_legend.append('text')
   .attr('x', legendRectSize + 2 * legendSpacing)
   .attr('y', legendRectSize - legendSpacing)
   .text(function(d) { return d; });
-
 //----------------------LEGEND FOR BUNDLE ----------------
 var svg_legend_bundle = d3.select("#legend_bundle").append("svg")
       .attr("width", 300)
       .attr("height", 100);
-
 var sub_legend_bundle = svg_legend_bundle.selectAll('.legend')
   .data(color_bundle.domain())
   .enter()
@@ -206,63 +198,49 @@ var sub_legend_bundle = svg_legend_bundle.selectAll('.legend')
   .attr('height', legendRectSize)
   .style('fill', color)
   .style('stroke', color);
-
   sub_legend_bundle.append('text')
   .attr('x', legendRectSize + 2 * legendSpacing)
   .attr('y', legendRectSize - legendSpacing)
   .text(function(d) { return d; });
 //---------------------END LEGEND---------------------------
-
 //--------------------BUNDLE SETUP--------------------------
 var diameter = 800,
     radius = diameter / 2,
     innerRadius = radius - 150;
-
 var cluster = d3.layout.cluster()
     .size([360, innerRadius])
     .sort(null)
     .value(function(d) { return d.size; });
-
 var bundle = d3.layout.bundle();
-
 var line = d3.svg.line.radial()
     .interpolate("bundle")
     .tension(0.7)
     .radius(function(d) { return d.y; })
     .angle(function(d) { return d.x / 180 * Math.PI; });
-
-
 var svg_bundle = d3.select("#graph2").append("svg")
     .attr("width", diameter)
     .attr("height", diameter)
   .append("g")
     .attr("transform", "translate(" + radius + "," + radius + ")");
-
 var link_bundle = svg_bundle.append("g").selectAll(".link_bundle"),
     node_bundle = svg_bundle.append("g").selectAll(".node_bundle");
-
 //------------------ END BUNDLE SETUP --------------------------
-
 //---------------- BUBBLE CHART SETUP ---------------------------
 var force = d3.layout.force()
     .charge(function(d, i) { return i ? -1: -100; })
     .gravity(0.1)
     // .linkDistance(100)
     .size([width, height]);
-
 var pie = d3.layout.pie().value(function(d){return d;})
 .sort(function (a, b) {return b - a;});
-
 var svg = d3.select("#graph1").append("svg")
     .attr("width", width)
     .attr("height", height);
 //---------------- END BUBBLE CHART SETUP ------------------------
-
 d3.json("data/d3data-100.json", function(error, graph) {
   var new_nodes = convert(graph.nodes)[0];
   var nodes = cluster.nodes(packageHierarchy(graph.nodes)),
     links = packageImports(nodes, graph.links);
-
   var loading = svg_bundle.append("text")
     .attr("x", width / 2)
     .attr("y", height / 2)
@@ -270,65 +248,49 @@ d3.json("data/d3data-100.json", function(error, graph) {
     .style("text-anchor", "middle")
     .text("Simulating. One moment please…");
 //---------------------- BAR CHART -------------------------
-
 var margin = {top: 20, right: 0, bottom: 100, left: 50},
     width_bar = width - margin.left - margin.right,
     height_bar = height - margin.top - margin.bottom;
-
-
 var userNameList = [];
 var total_count_list = [];
 var i = -1;
-
 var x = d3.scale.ordinal()
     .rangeRoundBands([0, width_bar], .1);
-
 var y = d3.scale.linear()
     .rangeRound([height_bar, margin.top]);
-
 var xAxis = d3.svg.axis()
     .scale(x)
     .orient("bottom");
-
 var yAxis = d3.svg.axis()
     .scale(y)
     .orient("left")
     .tickFormat(d3.format(".2s"));
-
 var svg_bar = d3.select("#graph3").append("svg")
     .attr("width", width)
     .attr("height", height)
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
 while (++i<graph.nodes.length){
   userNameList.push((graph.nodes[i]).userName);
   total_count_list.push((graph.nodes[i]).followersCount + (graph.nodes[i]).followingCount);
 }
-
 bar_category = ["Follower", "Following"]
-
 graph.nodes.forEach(function(d){
   var y0 = 0;
   d.outcomes = bar_category.map(function(name){
     if (name == "Follower"){
       rst = {name: name, y0: y0, y1: (y0 + d.suspendedFollowersCount)};
-
       y0 = y0 + d.suspendedFollowersCount;
     } else if (name == "Following") {
       rst = {name: name, y0: y0, y1: (y0 + d.suspendedFollowingCount)};
-
       y0 = y0 + d.suspendedFollowingCount;
     }
-
       return rst;
   });
 })
 var suspendedcount1 = d3.max(total_count_list, function(d) { return d;});
-
  // Update the scale domains.
 x.domain(userNameList);
 y.domain([0, 100]);
-
 svg_bar.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate("+margin.left+"," + height_bar + ")")
@@ -347,7 +309,6 @@ svg_bar.append("g")
                 return "#de2d26";
               }
             });
-
 svg_bar.append("g")
       .attr("class", "y axis")
       .attr("transform", "translate(" + margin.left + ",0)")
@@ -358,15 +319,12 @@ svg_bar.append("g")
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("Count");
-
 div_bar = svg_bar.selectAll("div")
                 .data(graph.nodes)
                 .enter().append("g")
       .attr("class", "g")
       .attr("transform", function(d) { 
         return "translate(" + ((x(d.userName))+margin.left) + ",0)" });
-
-
 div_bar.selectAll("rect")
         .data(function(d){return d.outcomes})
         .enter().append("rect")
@@ -376,7 +334,6 @@ div_bar.selectAll("rect")
     return (y(d.y0) - y(d.y1)); })
    // use the color scale to determine the fill color
    .attr("fill", function(d) { return color(d.name); });
-
 function look_up_susp(name){
   var index = userNameList.indexOf(name);
   return graph.nodes[index].suspended;
@@ -388,7 +345,6 @@ function look_up_susp(name){
     .each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
     .attr("class", "link_bundle")
     .attr("d", line);
-
   node_bundle = node_bundle
     .data(nodes.filter(function(n) { return !n.children; }))
     .enter().append("text")
@@ -406,31 +362,24 @@ function look_up_susp(name){
     })
     .on("mouseover", mouseovered)
     .on("mouseout", mouseouted);
-
     loading.remove();
-
 function mouseovered(d) {
   node_bundle
       .each(function(n) { 
         n.target = n.source = false; });
-
   link_bundle
       .classed("link--target", function(l) { 
         if (l.target === d) return l.source.source = true; })
       .classed("link--source", function(l) { if (l.source === d) return l.target.target = true; })
     .filter(function(l) { return l.target === d || l.source === d; })
       .each(function() { this.parentNode.appendChild(this); });
-
 }
-
 function mouseouted(d) {
   link_bundle
       .classed("link--target", false)
       .classed("link--source", false);
 }
-
 d3.select(self.frameElement).style("height", diameter + "px");
-
 var count = 0;
 // Lazily construct the package hierarchy from class names.
 function packageHierarchy(classes) {
@@ -447,42 +396,34 @@ function packageHierarchy(classes) {
     } 
     return node;
   }
-
   classes.forEach(function(d) {
     find(d.userId, d);
   });
   return map[""];
 }
-
 // Return a list of imports for the given array of nodes.
 function packageImports(nodes, links) {
   var map = {},
       imports = [];
-
   // Compute a map from name to node.
   nodes.forEach(function(d) {
     map[d.userName] = d;
   });
-
   // For each import, construct a link from the source to target node.
   links.forEach(function(d) {
     var s = d.source,
       t = d.target;
-
     imports.push({source: nodes[s], target: nodes[t]});
     });
   return imports;
 }
-
 //------------------- BUBBLE CHART ---------------------
   force
       .nodes(new_nodes)
       // .links(graph.links)
       .start();
-
   var root = new_nodes[0];
   root.fixed = true;
-
   var node = svg.selectAll(".node")
       .data(new_nodes.slice(1))
       .enter().append("circle")
@@ -496,7 +437,6 @@ function packageImports(nodes, links) {
       })
       // .call(node_drag)
       .on("click", function(d) { display_tip(d); });
-
   var innerC = svg.selectAll("svg")
       .data(new_nodes)
     .enter().append("circle")
@@ -507,35 +447,28 @@ function packageImports(nodes, links) {
         return innerR; })
       .style("fill", function(d) { return color(1); })
       .on("click", function(d) { display_tip(d); });
-
   function display_tip(d){
         var xPos = d3.event.pageX;
         var yPos = d3.event.pageY;
-
         d3.select("#tooltip")
           .style("left", xPos +"px")
           .style("top", yPos + "px")
           .select("#tweeter")
           .text(d.userName);
-
         d3.select("#tooltip")
           .select("#follower")
           .text(d.followersCount);
-
         d3.select("#tooltip")
           .select("#following")
           .text(d.followingCount);
-
         d3.select("#tooltip")
           .select("#tweet")
           .text(d.tweets);
-
         /*--- if clicked node is different from the one previously, reopen tooltip for the new node by setting visible to false --- */
         if (active_node != d.userName){
           visible = false;
         }
         active_node = d.userName;
-
         /*--- toggle tooltip ---*/
         if (visible == false){
           d3.select("#tooltip").classed("hidden", false)
@@ -545,7 +478,6 @@ function packageImports(nodes, links) {
           visible = false;
         }
   }
-
   function tick(){
     var node_x = 0;
     var node_y = 0;
@@ -554,9 +486,7 @@ function packageImports(nodes, links) {
     innerC.attr("cx", function(d) { node_x = d.x; return d.x; })
         .attr("cy", function(d) { node_y = d.y;return d.y; });
   };
-
   loading.remove();
-
  force.on("tick", function ticky(e){
   var q = d3.geom.quadtree(new_nodes),
       i = -1,
@@ -565,14 +495,11 @@ function packageImports(nodes, links) {
   
   tick();
  });
-
  function convert(node_list){
   var result = [];
   var highFF = []
   var current_node = {};
-
   count = -1;
-
   while (++count<node_list.length){
       //----- for bubble chart ------
       current_node = node_list[count];
@@ -582,7 +509,6 @@ function packageImports(nodes, links) {
       // var followerR = 1 - followingR;
       // current_node.FFratio = [followingR, followerR];
       result.push(current_node);
-
       //------ for high following/follower ratio----
       if (followingR > 0.6){
         highFF.push(current_node.userName);
@@ -590,7 +516,6 @@ function packageImports(nodes, links) {
   };
   return [result, highFF];
  };
-
  function collide(node) {
   var node_r = node.r,
       r = node_r + 100,
@@ -616,16 +541,9 @@ function packageImports(nodes, links) {
   };
 };
 //----------------- END BUBBLE CHART -----------------
-
 });
-
-
-
 d3.json("data/d3data-100.json", function(error, classes) {
-
-
 });
-
     </script>
 </body>
 </html>
