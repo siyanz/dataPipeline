@@ -1,6 +1,16 @@
 
 body {
   font: 10px sans-serif;
+  padding-top: 70px;
+}
+
+h3:before { 
+  display: block; 
+  content: " "; 
+  margin-top: -70px; 
+  height: 70px; 
+  visibility: hidden; 
+}
 }
 .node {
   stroke: #fff;
@@ -49,9 +59,6 @@ rect {
         transition: all 0.3s;
 }
 
-rect:hover {
-        fill: orange;
-}
 
 #legend_space {
     padding-top: 100px;
@@ -73,11 +80,19 @@ rect:hover {
 .link--source{
   stroke-opacity: 1;
   stroke-width: 2px;
-  stroke: #43a2ca;
+  stroke: #a8ddb5;
 }
 
 .link--target {
   stroke-opacity: 1;
   stroke-width: 2px;
-  stroke: #a8ddb5;
+  stroke: #43a2ca;
+}
+
+/* For bar chart */
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
 }

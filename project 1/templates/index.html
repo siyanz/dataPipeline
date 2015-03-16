@@ -18,9 +18,19 @@
 </head>
 
 <body>
-	<div class="navbar navbar-default">
-			<h3 class="navbar-header" style = "margin-left: 20px">Project 1: ISIS twitter network analysis</h3>
+	<div class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+			<div class="navbar-header">
+        <a class="navbar-brand" href="#">Project 1: ISIS twitter network analysis</a>
+      </div>
+      <ul class="nav navbar-nav navbar-right">
+              <li ><a href="#intro">Introduction</a></li>
+              <li><a href="#data">Data</a></li>
+              <li><a href="#result">Result</a></li>
+              <li><a href="#future">Future Research</a></li>
+            </ul>
 	</div>
+</div>
 
 	<div class="container">
     <div id="tooltip" class="hidden">
@@ -29,12 +39,44 @@
       <p><strong>Following amount: </strong><span id="following">100</span></p>
       <p><strong>Most recent tweet: </strong><span id="tweet">100</span></p>
     </div>
-    <h4>Following/Follower count chart </h4>
-    <br>
-    <h5 style="font-weight:bold">Data Quality</h5>
-    <p>While cleaning and visualizing the data, we found a few data points with incomplete information, such as missing tweeter usernames and following/follower accounts information. In this particular visualization, nodes with all but one piece of information present are disgarded. </p>
-    <p style="font-weight:bold">Chart Interpretation</p>
-    <p> The size of each circle represents the total follower and following amount while the inner circle represents the following amount. Circles with a <span style="color:red">red</span> outline were suspended in March, 2015.</p>
+    <h3 id="intro">Introduction</h3>
+    <p>The shocking and powerful rise of the pseudo-state often referred to as ISIS has been marked by exceptional use of social media to recruit and organize fighters.  This propaganda campaign has revealed a new type of spiritual authority we will refer to as “disseminators”.  These “disseminators” are not overtly involved in facilitating the flow of foreign fighters into Syria and Iraq, but their statements and interactions can be seen as providing encouragement and religious legitimacy to the cause.[1]</p>
+    <p>This project will pull data from the Twitter REST API[2] , conduct a network analysis in ORA [3], and provide the user with data visualizations that focus on answering the following questions:</p>
+    <ul>
+      <li>How large is the ISIS propaganda network on Twitter?</li>
+      <li> Can we search for and identify its members?</li>
+      <li>Can we identify the relative importance of its members?</li>
+    </ul>
+    <hr>
+    <h3 id="data"></a>Data</h3>
+    <div class="row marketing">
+      <div class="col-lg-6">
+        <p>Snowball sample the Twitter API on 12/7/2014.</p>
+    <ul>
+      <li>S0 = { ShamiWitness, SaqrAnsaar, AbuSiqr, JabhtAnNusrah_s, Khalid_Maqdisi }</li>
+      <li>S1 = the union of all Twitter users followed by members of S0  and S0</li>
+      <li>S2 = the union of all Twitter users followed by members of S1 and S1</li>
+    </ul>
+      </div>
+     <div class="col-lg-6">
+      <figure>
+      <img src="image/Figure1.png" style="width: 100%">
+      <figcaption>Displays the top 5, still active disseminator accounts identified in the ICSR #Greenbirds Report [1]
+</figcaption>
+      </figure>
+     </div>
+   </div>
+    <hr>
+<h3 id="result"></a>Results</h3>
+<h4> How large is the ISIS propaganda network on Twitter?</h4>
+<p>As with most covert networks, bounding the network and estimating size is non-trivial.  News media has estimated the size to be between 5000 and 45000 users.  Due to the difficulty of discriminating between news media, bloggers, and propagandists. We cannot estimate the size of the ISIS propaganda network at this time.  However, we have been able to identify a core cluster of propagandists, and this interactive visualization will facilitate supervised learning in the future to classify network members and estimate overall size of the true network.  
+</p>
+<h4>Can we search for and identify its members?</h4>
+<p>The data cleaning process we went through reduced the original network down to 100 tweeter handles. On 3/1/2015 Twitter suspended approximately 2000 accounts it claimed were spreading ISIS propaganda[5].  3.98% or 6606 of the 123,532 accounts identified in our snowball sample have been deleted or suspended as of 3/12/2015.  52 of our “Top 100 cluster” have been suspended which indicates our clusters and the cleaning process can help us search for members in the ISIS propaganda network, albeit not perfect.</p>
+<p>Of the 100 people, we try to identify what are some features of ISIS propaganda members by comparing the accounts that were suspended and that were not.</p>
+<br>
+    <h5>Following/Follower count chart </h5>
+    <p> <span style="font-weight: bold">The size of each circle represents the total amount of followers one has </span> and the inner circle represents the following account amount. Circles with a <span style="color:red">red</span> outline were suspended in March, 2015.</p>
     <p>It seems that the amount of followers one has is not a good indicator of it being a part of the ISIS propaganda network. Rather, the ratio of follower/following amount might be a better indicator, as seen the majority of the suspended accounts have a relatively large inner circle in the plot. Hence, the ratio should be considered if we want to predict accounts that will be radicalized in the future. </p>
 
     <div class="row marketing" style="margin-top: 50px">
@@ -42,14 +84,58 @@
       <div class="col-lg-4" id = "legend_space">
         </div>
       </div>
-      <h4>Hierarchical Bundle Chart</h4>
-      <br>
-    <p>This chart shows how these 100 people interact with each other. </p>
+      <h5>Hierarchical Bundle Chart</h5>
+    <p>This chart shows how these 100 people interact with each other. By scrolling through the 100 people and looking at their connections, intuitively, it seems that the visualization tells that if one has more connections (whether it's following or being followed) with people who are considered as a propoganda member, they are more likely to be considered as a member and, hence, has its account suspended. </p>
+    <p>So we decided to look at if this is true.</p>
       <div class="row marketing" style="margin-top: 50px">
         <div class="col-lg-8" id = "graph2"></div>
         <div class="col-lg-4" id = "legend_bundle"></div>
       </div>
+  <h5>Bar chart of suspended followers and following accounts</h5>
+  <p>This chart plots, for each tweet account, how many of its followers and following accounts that are within the top 100 were suspended. This might be an indicator of whether or not the account belongs to a member of a ISIS propaganda network.</p>
+  <p>From the chart, it seems that the suspended accounts had more followers/following accounts that are suspended. That is, if an account is following or is followed by many accounts that were suspended, this particular account is more likely to be part of the propaganda network.</p>
+  <div class="row marketing" style="margin-top: 50px">
+        <div class="col-lg-8" id = "graph3"></div>
+      <div class="col-lg-4" id = "legend_space"></div>
+      </div>
+  <h4>Can we identify the relative importance of its members?</h4>
+  <div class="row marketing">
+      <div class="col-lg-6">
+<p>In-degree centrality is defined as the number of group members following a specific user and provides a useful metric to estimate the relative importance of group members in our network.  In the bubble chart we depict node size with in-degree centrality (green inner circles), and color indicates whether the accounts have been deactivated since 12/2/2014. Nodes with red outlines have been deleted by the user or suspended by Twitter. </p>
+  <p>Although our results indicate that we can isolate many of the user accounts we are interested in, the size of our search results and the strong relationship between disseminators and regional news media makes it challenging to differentiate using standard network clustering algorithms such as Girvan-Newman or the Louvain Method. </p>
+  <p>The figure on the right shows the top 100 users identified in our seed agent dominated Louvain cluster.  Agents were selected by in-degree centrality, and their values are depicted with by node size.  Color indicates whether the accounts remain active as of 3/12/2015.  Blue accounts are currently active, while green accounts have been deleted by the user or suspended by Twitter.</p>
+      </div>
+     <div class="col-lg-6">
+      <figure>
+      <img src="image/Shami100.png" style="width: 100%">
+      </figure>
+     </div>
+   </div>
+
+   <hr>
+   <h3 id="future">Future Research</h3>
+   <p>We would want to develop a more informed clustering algorithm by:</p>
+   <ul>
+     <li>  better leveraging the information provided by the Twitter REST API such as: retweets, mentions.</li>
+     <li>identify and label news media and official accounts.</li>
+     <li> identify and label all suspended accounts.</li>
+   </ul>
+<p>The problem lends itself to a visualization that capitalizes on the ability of the user to classify user accounts and facilitate a machine learning algorithm for clustering.</p>
+<p>Another question of our interest is to identify a populations of users in the early phases of being radicalized.</p>
+  
+  <hr>
+  <h3>References</h3>
+  <p>[1]     J. A. Carter, S. Maher, and P. R. Neumann, “#Greenbirds: Measuring Importance and Influence in Syrian Foreign Fighter Networks.” International Centre for the Study of Radicalization, 01-Apr-2014.</p>
+  <p>[2]     R. Twitter, API. 2013.</p>
+  <p>[3]     K. M. Carley and J. Reminga, “ORA: Organizational Risk Analyzer,” Jul. 2004.</p>
+  <p>[4]     V. D. Blondel, J.-L. Guillaume, R. Lambiotte, and E. Lefebvre, “Fast unfolding of communities in large networks,” J. Stat. Mech. Theory Exp., vol. 2008, no. 10, p. P10008, Oct. 2008.</p>
+  <p>[5]     B. Ross, “Twitter Escalates ISIS Battle: 2,000 Accounts Suspended,” ABC News, 03-Mar-2015. [Online]. Available: http://abcnews.go.com/International/twitter-escalates-isis-skirmish-2000-accounts-suspended-week/story?id=29335434. [Accessed: 12-Mar-2015].</p>
+  <hr>
+  <footer>
+    <div class="container">
+    <p>2014 Project for Data Pipeline by Matthew Benigni, Asher Cohan, Ariel Norling, and Siyan Zhao. </p>
   </div>
+  </footer>
 		<script>
 
 var width = 800,
@@ -170,11 +256,10 @@ var pie = d3.layout.pie().value(function(d){return d;})
 var svg = d3.select("#graph1").append("svg")
     .attr("width", width)
     .attr("height", height);
-//---------------- END BUBBLE CHART SETUP -------------------------
+//---------------- END BUBBLE CHART SETUP ------------------------
 
 d3.json("data/d3data-100.json", function(error, graph) {
-  var new_nodes = convert(graph.nodes)[0],
-    highFF_nodes = convert(graph.nodes)[1];
+  var new_nodes = convert(graph.nodes)[0];
   var nodes = cluster.nodes(packageHierarchy(graph.nodes)),
     links = packageImports(nodes, graph.links);
 
@@ -184,8 +269,118 @@ d3.json("data/d3data-100.json", function(error, graph) {
     .attr("dy", ".35em")
     .style("text-anchor", "middle")
     .text("Simulating. One moment please…");
+//---------------------- BAR CHART -------------------------
+
+var margin = {top: 20, right: 0, bottom: 100, left: 50},
+    width_bar = width - margin.left - margin.right,
+    height_bar = height - margin.top - margin.bottom;
 
 
+var userNameList = [];
+var total_count_list = [];
+var i = -1;
+
+var x = d3.scale.ordinal()
+    .rangeRoundBands([0, width_bar], .1);
+
+var y = d3.scale.linear()
+    .rangeRound([height_bar, margin.top]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .tickFormat(d3.format(".2s"));
+
+var svg_bar = d3.select("#graph3").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+while (++i<graph.nodes.length){
+  userNameList.push((graph.nodes[i]).userName);
+  total_count_list.push((graph.nodes[i]).followersCount + (graph.nodes[i]).followingCount);
+}
+
+bar_category = ["Follower", "Following"]
+
+graph.nodes.forEach(function(d){
+  var y0 = 0;
+  d.outcomes = bar_category.map(function(name){
+    if (name == "Follower"){
+      rst = {name: name, y0: y0, y1: (y0 + d.suspendedFollowersCount)};
+
+      y0 = y0 + d.suspendedFollowersCount;
+    } else if (name == "Following") {
+      rst = {name: name, y0: y0, y1: (y0 + d.suspendedFollowingCount)};
+
+      y0 = y0 + d.suspendedFollowingCount;
+    }
+
+      return rst;
+  });
+})
+var suspendedcount1 = d3.max(total_count_list, function(d) { return d;});
+
+ // Update the scale domains.
+x.domain(userNameList);
+y.domain([0, 100]);
+
+svg_bar.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate("+margin.left+"," + height_bar + ")")
+      .call(xAxis)
+      .selectAll("text")  
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("font-size", "9px")
+            .attr("transform", function(d) {
+                return "rotate(-65)" 
+                })
+            .style("fill", function(d){
+              if (look_up_susp(d)) {
+                console.log("I am ehre");
+                return "#de2d26";
+              }
+            });
+
+svg_bar.append("g")
+      .attr("class", "y axis")
+      .attr("transform", "translate(" + margin.left + ",0)")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Count");
+
+div_bar = svg_bar.selectAll("div")
+                .data(graph.nodes)
+                .enter().append("g")
+      .attr("class", "g")
+      .attr("transform", function(d) { 
+        return "translate(" + ((x(d.userName))+margin.left) + ",0)" });
+
+
+div_bar.selectAll("rect")
+        .data(function(d){return d.outcomes})
+        .enter().append("rect")
+   .attr("width", x.rangeBand())
+   .attr("y", function(d) { return y(d.y1); })
+   .attr("height", function(d) { 
+    return (y(d.y0) - y(d.y1)); })
+   // use the color scale to determine the fill color
+   .attr("fill", function(d) { return color(d.name); });
+
+function look_up_susp(name){
+  var index = userNameList.indexOf(name);
+  return graph.nodes[index].suspended;
+}
 //------------------ BUNDLE CHART ----------------------
   link_bundle = link_bundle
     .data(bundle(links))
@@ -216,11 +411,11 @@ d3.json("data/d3data-100.json", function(error, graph) {
 
 function mouseovered(d) {
   node_bundle
-      .each(function(n) { n.target = n.source = false; });
+      .each(function(n) { 
+        n.target = n.source = false; });
 
   link_bundle
       .classed("link--target", function(l) { 
-        console.log(l.target);
         if (l.target === d) return l.source.source = true; })
       .classed("link--source", function(l) { if (l.source === d) return l.target.target = true; })
     .filter(function(l) { return l.target === d || l.source === d; })
@@ -289,7 +484,7 @@ function packageImports(nodes, links) {
   root.fixed = true;
 
   var node = svg.selectAll(".node")
-      .data(new_nodes)
+      .data(new_nodes.slice(1))
       .enter().append("circle")
       .attr("class", "node")
       .attr("r", function(d) { return d.r; })
@@ -308,7 +503,7 @@ function packageImports(nodes, links) {
       .attr("class", "inner_node")
       .attr("r", function(d) { 
         var ratio = d.followingCount/d.followersCount;
-        var innerR = d.r*(ratio/(1+ratio));
+        var innerR = d.r*(ratio);
         return innerR; })
       .style("fill", function(d) { return color(1); })
       .on("click", function(d) { display_tip(d); });
@@ -364,7 +559,7 @@ function packageImports(nodes, links) {
 
  force.on("tick", function ticky(e){
   var q = d3.geom.quadtree(new_nodes),
-      i = 0,
+      i = -1,
       n = new_nodes.length;
   while (++i < n) q.visit(collide(new_nodes[i]));
   
@@ -376,13 +571,12 @@ function packageImports(nodes, links) {
   var highFF = []
   var current_node = {};
 
-  count = 0;
+  count = -1;
 
   while (++count<node_list.length){
       //----- for bubble chart ------
       current_node = node_list[count];
-      current_node.r = 
-      Math.sqrt(Math.sqrt((current_node.followersCount+current_node.followersCount)/10000));
+      current_node.r = Math.sqrt((current_node.followersCount/100));
       // var followingR = current_node.followingCount/(current_node.followersCount+current_node.followingCount);
       var followingR = current_node.followingCount/current_node.followersCount;
       // var followerR = 1 - followingR;
