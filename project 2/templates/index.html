@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Project 2</title>
+  	<link href="stylesheets/d3.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="d3/d3.min.js"></script>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+	<div class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+			<div class="navbar-header">
+        <a class="navbar-brand" href="#">Project 2: ISIS twitter network: machine learning</a>
+      </div>
+      <ul class="nav navbar-nav navbar-right">
+              <li ><a href="#intro">Introduction</a></li>
+            </ul>
+	</div>
+</div>
+
+	<div class="container">
+    <h3 id="intro">Introduction</h3>
+    <p>The shocking and powerful rise of the pseudo-state often referred to as ISIS has been marked by exceptional use of social media to recruit and organize fighters.  This propaganda campaign has revealed a new type of spiritual authority we will refer to as “disseminators”.  These “disseminators” are not overtly involved in facilitating the flow of foreign fighters into Syria and Iraq, but their statements and interactions can be seen as providing encouragement and religious legitimacy to the cause.[1]</p>
+    <p>This project will analyze data from the Twitter REST API[2] , conduct a network analysis in ORA [3], and provide the user with data visualizations that focus on answering the following questions:</p>
+    <ul>
+      <li>How large is the ISIS propaganda network on Twitter?</li>
+      <li>Can we search for and identify its members?</li>
+      <li>Can we identify the relative importance of its members?</li>
+    </ul>
+    <hr>
+    <h3>Top 100 Twitter Handle Selection Comparison</h3>
+    <p>This chart allows and end user to explore how our top 100 accounts are related with one another. Users with red letters represent the same suspended accounts circled in red in the Following/Follower Count Chart.  By selecting a screen name and looking at connections, intuitively, it seems that the visualization tells that if a user is following and followed by suspended accounts, he/she is more likely to be suspended. </p>
+   
+      <div class="row marketing" style="margin-top: 50px">
+        <div class="col-lg-6" id = "graph"></div>
+        <div class="col-lg-6" id = "graph2"></div>
+      </div>
+  <hr>
+  <h3>Who are these Twitter Handles?</h3>
+    <div class="row marketing" style="margin-top: 50px">
+      <form target="_self" onsubmit="" action="javascript: postContactToGoogle()">
+        <div class="col-lg-6" id = "question">
+            <div class="row marketing">
+              <div class="col-lg-3"> </div>
+              <div class="col-lg-3">Propagandist</div>
+              <div class="col-lg-3">News Media</div>
+              <div class="col-lg-3">Neither</div>
+            </div>
+        </div>
+      </form>
+      <div class="col-lg-6" id = "graph3"></div>
+    </div>
+  <footer>
+    <div class="container">
+    <p>2014 Project for Data Pipeline by Matthew Benigni, Asher Cohan, and Siyan Zhao. </p>
+  </div>
+  </footer>
+		<script>
+
+//-------------------- SETUP SURVEY FORM ----------------------
+var id = ["twitter1", "twitter2"];
+var survey_count = 0;
+while (survey_count < id.length) {
+  var newdiv = document.createElement('div');
+  newdiv.className = "row marketing";
+
+  newdiv.innerHTML="<div class='col-lg-3' id='name" + survey_count + "' value='" + id[survey_count] + "'>" + id[survey_count] + "</div><div class='col-lg-3'><input type='radio' name='ctg" + survey_count + "' value='propagandist'></div><div class='col-lg-3'><input type='radio' name='ctg" + survey_count + "' value='news'></div><div class='col-lg-3'><input type='radio' name='ctg" + survey_count + "' value='neither'></div></div>";
+  console.log(newdiv);
+  survey_count += 1;
+  document.getElementById('question').appendChild(newdiv);
+}
+document.getElementById('question').appendChild(document.createElement('br'));
+var button_div = document.createElement('button');
+button_div.setAttribute("id", "send");
+button_div.setAttribute("type","submit");
+button_div.innerHTML="Submit";
+document.getElementById('question').appendChild(button_div);
+
+
+var width = 800,
+    height =800,
+    n = 500,
+    visible = false,
+    active_node = '';
+var color = d3.scale.ordinal().range(["#43a2ca", "#a8ddb5"]);
+var color_bundle = d3.scale.ordinal().range(["#43a2ca", "#a8ddb5"]);
+color.domain(["Follower", "Following"]);
+color_bundle.domain(["Being followed", "Following others"])
+//----------------------------LEGEND------------------------------
+var legendRectSize = 18;
+var legendSpacing = 4;
+var svg_legend = d3.select("#legend_space").append("svg")
+      .attr("width", 300)
+      .attr("height", 100);
+var sub_legend = svg_legend.selectAll('.legend')
+  .data(color.domain())
+  .enter()
+  .append('g')
+  .attr('class', 'legend')
+  .attr('transform', function(d, i) {
+    var height = legendRectSize + 2 * legendSpacing;
+    var width = 150;
+    var offset =  height * color.length / 2;
+    var horz = 2 * legendRectSize;
+    var vert = i * height + 2;
+    return 'translate(' + horz + ',' + vert + ')';
+  });
+  
+  sub_legend.append('rect')
+  .attr('width', legendRectSize)
+  .attr('height', legendRectSize)
+  .style('fill', color)
+  .style('stroke', color);
+  sub_legend.append('text')
+  .attr('x', legendRectSize + 2 * legendSpacing)
+  .attr('y', legendRectSize - legendSpacing)
+  .text(function(d) { return d; });
+//----------------------LEGEND FOR BUNDLE ----------------
+var svg_legend_bundle = d3.select("#legend_bundle").append("svg")
+      .attr("width", "100%")
+      .attr("height", 100);
+var sub_legend_bundle = svg_legend_bundle.selectAll('.legend')
+  .data(color_bundle.domain())
+  .enter()
+  .append('g')
+  .attr('class', 'legend')
+  .attr('transform', function(d, i) {
+    var height = legendRectSize + 2 * legendSpacing;
+    var width = 150;
+    var offset =  height * color.length / 2;
+    var horz = 2 * legendRectSize;
+    var vert = i * height + 2;
+    return 'translate(' + horz + ',' + vert + ')';
+  });
+  
+  sub_legend_bundle.append('rect')
+  .attr('width', legendRectSize)
+  .attr('height', legendRectSize)
+  .style('fill', color)
+  .style('stroke', color);
+  sub_legend_bundle.append('text')
+  .attr('x', legendRectSize + 2 * legendSpacing)
+  .attr('y', legendRectSize - legendSpacing)
+  .text(function(d) { return d; });
+//---------------------END LEGEND---------------------------
+//--------------------BUNDLE SETUP--------------------------
+
+//Set diameter of chart to be half of the container width, or the same as the width of graph
+var diameter = document.getElementById('graph').offsetWidth,
+    radius = diameter / 2,
+    innerRadius = radius - 150;
+var cluster = d3.layout.cluster()
+    .size([360, innerRadius])
+    .sort(null)
+    .value(function(d) { return d.size; });
+var bundle = d3.layout.bundle();
+var line = d3.svg.line.radial()
+    .interpolate("bundle")
+    .tension(0.7)
+    .radius(function(d) { return d.y; })
+    .angle(function(d) { return d.x / 180 * Math.PI; });
+var svg_bundle = d3.select("#graph").append("svg")
+    .attr("width", diameter)
+    .attr("height", diameter)
+  .append("g")
+    .attr("transform", "translate(" + radius + "," + radius + ")");
+var link_bundle = svg_bundle.append("g").selectAll(".link_bundle"),
+    node_bundle = svg_bundle.append("g").selectAll(".node_bundle");
+//--------------------- END BUNDLE SETUP -----------------------
+
+
+//----------------------- BUNDLE CHART -------------------------
+d3.json("data/d3data-100.json", function(error, graph) {
+  var new_nodes = convert(graph.nodes)[0];
+  var nodes = cluster.nodes(packageHierarchy(graph.nodes)),
+    links = packageImports(nodes, graph.links);
+  var loading = svg_bundle.append("text")
+    .attr("x", width / 2)
+    .attr("y", height / 2)
+    .attr("dy", ".35em")
+    .style("text-anchor", "middle")
+    .text("Simulating. One moment please…");
+  link_bundle = link_bundle
+    .data(bundle(links))
+  .enter().append("path")
+    .each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
+    .attr("class", "link_bundle")
+    .attr("d", line);
+  node_bundle = node_bundle
+    .data(nodes.filter(function(n) { return !n.children; }))
+    .enter().append("text")
+    .attr("class", "node_bundle")
+    .attr("dy", ".1em")
+    .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
+    .style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+    .text(function(d, i) {return d.userName;})
+    .attr("font-size", "8.5pt")
+    .style("fill", function(d) {
+      if (d.suspended == true) {
+        return "#de2d26";
+      } else {
+        return "#bbb";
+      }
+    })
+    .on("mouseover", mouseovered)
+    .on("mouseout", mouseouted)
+    .on("click", function(d) { new_page(d); });
+
+    loading.remove();
+});
+
+
+//--------------------- HELPER FUNCTIONS -----------------------
+function mouseovered(d) {
+  node_bundle
+      .each(function(n) { 
+        n.target = n.source = false; });
+  link_bundle
+      .classed("link--target", function(l) { 
+        if (l.target === d) return l.source.source = true; })
+      .classed("link--source", function(l) { if (l.source === d) return l.target.target = true; })
+    .filter(function(l) { return l.target === d || l.source === d; })
+      .each(function() { this.parentNode.appendChild(this); });
+}
+function mouseouted(d) {
+  link_bundle
+      .classed("link--target", false)
+      .classed("link--source", false);
+}
+
+function new_page(d){
+  window.open("http://www.twitter.com");
+}
+
+d3.select(self.frameElement).style("height", diameter + "px");
+var count = 0;
+// Lazily construct the package hierarchy from class names.
+function packageHierarchy(classes) {
+  var map = {};
+  function find(name, data) {
+    var node = map[name];
+    if (!node) {
+      node = map[name] = data || {name: name, children: []};
+      if (name){
+          node.parent = find("");
+          node.parent.children.push(node);
+          node.key = name;
+        } 
+    } 
+    return node;
+  }
+  classes.forEach(function(d) {
+    find(d.userId, d);
+  });
+  return map[""];
+}
+// Return a list of imports for the given array of nodes.
+function packageImports(nodes, links) {
+  var map = {},
+      imports = [];
+  // Compute a map from name to node.
+  nodes.forEach(function(d) {
+    map[d.userName] = d;
+  });
+  // For each import, construct a link from the source to target node.
+  links.forEach(function(d) {
+    var s = d.source,
+      t = d.target;
+    imports.push({source: nodes[s], target: nodes[t]});
+    });
+  return imports;
+}
+
+ function convert(node_list){
+  var result = [];
+  var highFF = []
+  var current_node = {};
+  count = -1;
+  while (++count<node_list.length){
+      //----- for bubble chart ------
+      current_node = node_list[count];
+      current_node.r = Math.sqrt((current_node.followersCount/100));
+      var followingR = current_node.followingCount/current_node.followersCount;
+      // var followerR = 1 - followingR;
+      // current_node.FFratio = [followingR, followerR];
+      result.push(current_node);
+      //------ for high following/follower ratio----
+      if (followingR > 0.6){
+        highFF.push(current_node.userName);
+      }
+  };
+  return [result, highFF];
+};
+
+
+function postContactToGoogle(){
+  var count = 0;
+  while (count < id.length){
+      var label = "#name"+count;
+      var name = $(label).html();
+      console.log(name);
+      var label2 = "input:radio[name=ctg" + count+ "]:checked"
+      var ctg = $(label2).val();
+      console.log(ctg);
+      if ((name !== "") && (ctg !== undefined)) {
+          $.ajax({
+              url: "https://docs.google.com/forms/d/1hIOVBntoES0YMM9986imNeL1ABtFa9w9Wwi53GTON9U/formResponse",
+              data: {"entry_307378150" : name, "entry_1918770315" : ctg},
+              type: "POST",
+              dataType: "xml",
+              statusCode: {
+                  0: function (){
+                    console.log("DONE");
+                      //Success message
+                  },
+                  200: function (){
+                    console.log("DONE2")
+                      //Success Message
+                  }
+              }
+          });
+      }
+      else {
+          //Error message
+      };
+    count += 1;
+    };
+    alert("Thank you for your response!");
+  };
+
+    </script>
+</body>
+</html>

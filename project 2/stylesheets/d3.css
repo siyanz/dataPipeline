@@ -1,0 +1,49 @@
+
+body {
+  font: 10px sans-serif;
+  padding-top: 70px;
+}
+
+h3:before { 
+  display: block; 
+  content: " "; 
+  margin-top: -70px; 
+  height: 70px; 
+  visibility: hidden; 
+}
+}
+.node {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+#legend_space {
+    padding-top: 100px;
+}
+
+/* For bundle graph */
+.node_bundle:hover {
+  font-weight: bold ;
+  cursor: pointer;
+}
+
+.link_bundle {
+  stroke: #bdbdbd;
+  stroke-opacity: .1;
+  fill: none;
+  pointer-events: none;
+}
+
+
+.link--source{
+  stroke-opacity: 1;
+  stroke-width: 1.5px;
+  stroke: #a8ddb5;
+}
+
+.link--target {
+  stroke-opacity: 1;
+  stroke-width: 1.5px;
+  stroke: #43a2ca;
+}
+

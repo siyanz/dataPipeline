@@ -464,6 +464,7 @@ function packageImports(nodes, links) {
         d3.select("#tooltip")
           .select("#tweet")
           .text(d.tweets);
+        //window.open("http://www.w3schools.com");
         /*--- if clicked node is different from the one previously, reopen tooltip for the new node by setting visible to false --- */
         if (active_node != d.userName){
           visible = false;

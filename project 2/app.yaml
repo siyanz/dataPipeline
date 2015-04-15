@@ -1,0 +1,28 @@
+application: project2-isistweet
+version: 1-1
+runtime: python27
+api_version: 1
+threadsafe: yes
+
+handlers:
+- url: /stylesheets
+  static_dir: stylesheets
+- url: /d3
+  static_dir: d3
+- url: /data
+  static_dir: data
+  application_readable: true
+- url: /image
+  static_dir: image
+- url: /.*
+  script: main.app
+
+libraries:
+- name: webapp2
+  version: latest
+- name: jinja2
+  version: latest
+- name: numpy
+  version: latest
+- name: django
+  version: latest
