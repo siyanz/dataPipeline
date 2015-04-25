@@ -11,7 +11,14 @@ h3:before {
   height: 70px; 
   visibility: hidden; 
 }
+
+
+p{
+  line-height: 28px;
+  padding-top: 0px;
+  padding-bottom: 16px;
 }
+
 .node {
   stroke: #fff;
   stroke-width: 1.5px;
@@ -47,3 +54,19 @@ h3:before {
   stroke: #43a2ca;
 }
 
+.response {
+  padding: 10px 0;
+  display: inline-block;
+  position: relative;
+}
+
+a{
+  color: #5bc0de
+}
+a:visited{
+  color:#428bcc;
+}
+
+footer{
+  padding-top:20px;
+}

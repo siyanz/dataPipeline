@@ -31,6 +31,7 @@ class BaseHandler(webapp2.RequestHandler):
         rv = self.jinja2.render_template(_template, **context)
         self.response.write(rv)
 
+
         # Class MainHandler now subclasses BaseHandler instead of webapp2
 class MainHandler(BaseHandler):
 

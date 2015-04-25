@@ -23,24 +23,21 @@
 			<div class="navbar-header">
         <a class="navbar-brand" href="#">Project 2: ISIS twitter network: machine learning</a>
       </div>
-      <ul class="nav navbar-nav navbar-right">
-              <li ><a href="#intro">Introduction</a></li>
-            </ul>
 	</div>
 </div>
 
 	<div class="container">
     <h3 id="intro">Introduction</h3>
     <p>The shocking and powerful rise of the pseudo-state often referred to as ISIS has been marked by exceptional use of social media to recruit and organize fighters.  This propaganda campaign has revealed a new type of spiritual authority we will refer to as “disseminators”.  These “disseminators” are not overtly involved in facilitating the flow of foreign fighters into Syria and Iraq, but their statements and interactions can be seen as providing encouragement and religious legitimacy to the cause.[1]</p>
-    <p>This project will analyze data from the Twitter REST API[2] , conduct a network analysis in ORA [3], and provide the user with data visualizations that focus on answering the following questions:</p>
-    <ul>
-      <li>How large is the ISIS propaganda network on Twitter?</li>
-      <li>Can we search for and identify its members?</li>
-      <li>Can we identify the relative importance of its members?</li>
-    </ul>
+    <p>This project analyzed data from the Twitter REST API to search and identify twitter accounts that are ISIS Supporters. Our twitter account database came from two step snowball sample of the Twitter public commons API. We use 5 'seed agents' or known ISIS supporters to develop our search. This sampling method gave us over 125,000 twitter accounts, from which we wanted to classify the ISIS Supporters. We find that without filtering, the network identified is dense with many connections between official news media, bloggers, and ISIS sympathizers. We tried two different methods of classifying ISIS supporters and visualized the 100 of the twitter accounts that our methods returned as propagandists. We also offered a survey platform where people can crowdsource classifications of twitter accounts.</p>
     <hr>
-    <h3>Top 100 Twitter Handle Selection Comparison</h3>
-    <p>This chart allows and end user to explore how our top 100 accounts are related with one another. Users with red letters represent the same suspended accounts circled in red in the Following/Follower Count Chart.  By selecting a screen name and looking at connections, intuitively, it seems that the visualization tells that if a user is following and followed by suspended accounts, he/she is more likely to be suspended. </p>
+    <h3>100 resulting twitter accounts</h3>
+    <p>We used two different methods to select 100 twitter accounts and display them using a bundle chart. The chart shows how each account connect with each other. The end user can explore by scrolling over the twitter names and click on them to go to their twitter page.</p>
+    <p>The grey names are accounts that have been deactivated by the Twitter company while the green ones are still active. Once hovered over an account, there are lines showing connection between accounts. Green lines connect the hovered-over account and accounts it follows (out-degree) while blue lines connect to accounts that follow the hovered-over account (in-degree).</p>
+    <h5>Louvain Grouping (left)</h5>
+    <p>We convert the sampled data into dynetml, and conducted a Louvain Grouping [4] to identify actor groups and remove actors that seemed less relevant. This method was able to identify a core cluster of ISIS propagandists. Then, using degree centrality, we narrowed town a list of 100 twitter accounts with high in-degree centrality. This means that they have high follower amount. </p>
+    <h5>Machine Learning (right)</h5>
+    <p>We used ___ algorithm on the sampled twitter database to classify propagandists. As we previously found that many news media accounts were falsely categorized as propagandists, we decided to first train a classifier for news media and take them out from the database. With the rest of the twitter accounts, we trained a separate classifier to identify the propagandists. The feature space we used were __, ___, _____, and _____. As a result, we got ____ twitter accounts that were classified as ISIS propagandists. Out of the ____ accounts, we sampled 100 and displayed them in a bundle chart. </p>
    
       <div class="row marketing" style="margin-top: 50px">
         <div class="col-lg-6" id = "graph"></div>
@@ -48,44 +45,118 @@
       </div>
   <hr>
   <h3>Who are these Twitter Handles?</h3>
+  <p>You can help us decide whether or not the following twitter accounts are ISIS propagandists. Simply click on the twitter user names in the first column to check out the account twitter page. And make a decision of whether the account holder is a propagandist or non-propagandist using the following criteria:</p>
     <div class="row marketing" style="margin-top: 50px">
       <form target="_self" onsubmit="" action="javascript: postContactToGoogle()">
-        <div class="col-lg-6" id = "question">
-            <div class="row marketing">
-              <div class="col-lg-3"> </div>
-              <div class="col-lg-3">Propagandist</div>
-              <div class="col-lg-3">News Media</div>
-              <div class="col-lg-3">Neither</div>
-            </div>
+        <div class="col-lg-8" id = "survey">
+          <table class="table table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Twitter handle </th>
+                <th>Propagandist</th>
+                <th>Non-propagandist</th>
+                <th>What criteria did you use to make the decision?</th>
+              </tr>
+            </thread>
+            <tbody id = "question"></tbody>
+          </table>
+        </div>
+        <div class="col-lg-4 well well-lg">
+          <h2> Total responses from:</h2>
+          <h1 id = "count" style="text-align: center; padding: 40px 0;"></h1>
+          <h2 style="text-align: center; "> people</h2>
         </div>
       </form>
       <div class="col-lg-6" id = "graph3"></div>
     </div>
   <footer>
-    <div class="container">
-    <p>2014 Project for Data Pipeline by Matthew Benigni, Asher Cohan, and Siyan Zhao. </p>
+    <div class="navbar">
+    <p class="navbar-text pull-left">2015 Project for Data Pipeline by Matthew Benigni, Asher Cohan, and Siyan Zhao. </p>
   </div>
   </footer>
-		<script>
+	<script>
+
+//-----------------GET SCREENNAME FROM DATA--------------------
+
+var array = [];
+var userName_dict = {};
+var file;
+var global_id;
 
 //-------------------- SETUP SURVEY FORM ----------------------
-var id = ["twitter1", "twitter2"];
-var survey_count = 0;
-while (survey_count < id.length) {
-  var newdiv = document.createElement('div');
-  newdiv.className = "row marketing";
+function get_name(file){
+  $.getJSON(file)
+  .success(function(json) {
+      var i = 0;
+      while (i < json.nodes.length){
+        if (json.nodes[i].screenName != undefined && 
+            json.nodes[i].screenName != "" && 
+            json.nodes[i].userName != undefined && 
+            json.nodes[i].userName != "" ){
+          array.push(json.nodes[i].userName);
+          userName_dict[json.nodes[i].userName] = json.nodes[i].screenName;
+        };
 
-  newdiv.innerHTML="<div class='col-lg-3' id='name" + survey_count + "' value='" + id[survey_count] + "'>" + id[survey_count] + "</div><div class='col-lg-3'><input type='radio' name='ctg" + survey_count + "' value='propagandist'></div><div class='col-lg-3'><input type='radio' name='ctg" + survey_count + "' value='news'></div><div class='col-lg-3'><input type='radio' name='ctg" + survey_count + "' value='neither'></div></div>";
-  console.log(newdiv);
-  survey_count += 1;
-  document.getElementById('question').appendChild(newdiv);
+        i++;
+      };
+
+      //get randomized 10 items into an id array
+      var j = 0;
+      var id = [];
+      while (j < 5) {
+        index = Math.floor(Math.random() * (array.length - 1));
+        var key = array[index];
+        id.push({userName: [key], screenName: userName_dict[key]});
+        array.splice(index, 1);
+        j++;
+      }
+
+      console.log(id);
+
+      global_id = id;
+      var survey_count = 0;
+      while (survey_count < id.length) {
+      var newdiv = document.createElement('tr');
+      newdiv.innerHTML="<td><a href=http://www.twitter.com/"+id[survey_count].screenName+" target='_blank'><div id='name" + survey_count + "' value='" + id[survey_count].screenName + "'>" + id[survey_count].userName + "</div></a></td><td style='text-align: center;'><input type='radio' name='ctg" + survey_count + "' value='propagandist' required value='1'></td><td style='text-align: center;'><input type='radio' name='ctg" + survey_count + "' value='non-propangandist' required value='1'></td><td><textarea id='note" + survey_count + "' rows = '1' style='width: 100%;'></textarea></td>";
+      survey_count += 1;
+      document.getElementById('question').appendChild(newdiv);
+    }
+      var button_div = document.createElement('div');
+      button_div.setAttribute("style", "width:100%; height:100%");
+      button_div.innerHTML="<button id='send' type='submit'>Submit</button>"
+      document.getElementById('survey').appendChild(button_div);
+      // var button_div = document.createElement('button');
+      // button_div.setAttribute("id", "send");
+      // button_div.setAttribute("type","submit");
+      // button_div.innerHTML="Submit";
+      // document.getElementById('question').appendChild(button_div);
+  });
 }
-document.getElementById('question').appendChild(document.createElement('br'));
-var button_div = document.createElement('button');
-button_div.setAttribute("id", "send");
-button_div.setAttribute("type","submit");
-button_div.innerHTML="Submit";
-document.getElementById('question').appendChild(button_div);
+
+
+//----------------------GET SURVEY COUNT-------------------------
+function dataHandler(resp) 
+{  
+  try
+  {console.log(resp);
+    $('#count').html((resp.rows[0][0])/5);}
+  catch(err)
+  {$('#count').html('0');}
+};
+
+function getData() 
+{ var ApiKey='AIzaSyADYhiV4dFx-X9enfg5vQz-V41k9gXC0Ug';
+  var tableId = '1mSdUe6oy1D_IQj7Md3FgPDab11fsYAmoxR2ebQH1';
+  var queryUrlHead = 'https://www.googleapis.com/fusiontables/v2/query?sql=';
+  var queryUrlTail = '&jsonCallback=getData&key='+ApiKey;
+  var query = encodeURIComponent("SELECT COUNT() FROM " + tableId) ;
+  var queryurl = queryUrlHead + query + queryUrlTail;
+  console.log(queryurl);
+  var jqxhr = $.get(queryurl, dataHandler, "jsonp");
+};
+
+get_name("data/d3data-ML.json");
+getData();
 
 
 var width = 800,
@@ -177,6 +248,14 @@ var svg_bundle = d3.select("#graph").append("svg")
     .attr("transform", "translate(" + radius + "," + radius + ")");
 var link_bundle = svg_bundle.append("g").selectAll(".link_bundle"),
     node_bundle = svg_bundle.append("g").selectAll(".node_bundle");
+
+var svg_bundle2 = d3.select("#graph2").append("svg")
+    .attr("width", diameter)
+    .attr("height", diameter)
+  .append("g")
+    .attr("transform", "translate(" + radius + "," + radius + ")");
+var link_bundle2 = svg_bundle2.append("g").selectAll(".link_bundle"),
+    node_bundle2 = svg_bundle2.append("g").selectAll(".node_bundle");
 //--------------------- END BUNDLE SETUP -----------------------
 
 
@@ -208,9 +287,9 @@ d3.json("data/d3data-100.json", function(error, graph) {
     .attr("font-size", "8.5pt")
     .style("fill", function(d) {
       if (d.suspended == true) {
-        return "#de2d26";
-      } else {
         return "#bbb";
+      } else {
+        return "#6e8b3d";
       }
     })
     .on("mouseover", mouseovered)
@@ -221,6 +300,50 @@ d3.json("data/d3data-100.json", function(error, graph) {
 });
 
 
+d3.json("data/d3data-ML.json", function(error, graph) {
+  var new_nodes = convert(graph.nodes)[0];
+  var nodes = cluster.nodes(packageHierarchy(graph.nodes)),
+    links = packageImports(nodes, graph.links);
+  var loading = svg_bundle2.append("text")
+    .attr("x", width / 2)
+    .attr("y", height / 2)
+    .attr("dy", ".35em")
+    .style("text-anchor", "middle")
+    .text("Simulating. One moment please…");
+  link_bundle2 = link_bundle2
+    .data(bundle(links))
+  .enter().append("path")
+    .each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
+    .attr("class", "link_bundle")
+    .attr("d", line);
+  node_bundle2 = node_bundle2
+    .data(nodes.filter(function(n) { return !n.children; }))
+    .enter().append("text")
+    .attr("class", "node_bundle")
+    .attr("dy", ".1em")
+    .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
+    .style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+    .text(function(d, i) {return d.userName;})
+    .attr("font-size", "8.5pt")
+    .style("fill", function(d) {
+      if (d.suspended == true) {
+        return "#bbb";
+      } else {
+        return "#6e8b3d";
+      }
+    })
+    .on("mouseover", mouseovered_2)
+    .on("mouseout", mouseouted_2)
+    .on("click", function(d) { 
+      if (d.suspended == false){
+        new_page(d); 
+      } else{
+        return;
+      }
+    });
+
+    loading.remove();
+});
 //--------------------- HELPER FUNCTIONS -----------------------
 function mouseovered(d) {
   node_bundle
@@ -239,8 +362,25 @@ function mouseouted(d) {
       .classed("link--source", false);
 }
 
+function mouseovered_2(d) {
+  node_bundle2
+      .each(function(n) { 
+        n.target = n.source = false; });
+  link_bundle2
+      .classed("link--target", function(l) { 
+        if (l.target === d) return l.source.source = true; })
+      .classed("link--source", function(l) { if (l.source === d) return l.target.target = true; })
+    .filter(function(l) { return l.target === d || l.source === d; })
+      .each(function() { this.parentNode.appendChild(this); });
+}
+function mouseouted_2(d) {
+  link_bundle2
+      .classed("link--target", false)
+      .classed("link--source", false);
+}
+
 function new_page(d){
-  window.open("http://www.twitter.com");
+  window.open("http://www.twitter.com/"+d.screenName);
 }
 
 d3.select(self.frameElement).style("height", diameter + "px");
@@ -306,17 +446,18 @@ function packageImports(nodes, links) {
 
 function postContactToGoogle(){
   var count = 0;
-  while (count < id.length){
+  while (count < global_id.length){
       var label = "#name"+count;
       var name = $(label).html();
-      console.log(name);
       var label2 = "input:radio[name=ctg" + count+ "]:checked"
       var ctg = $(label2).val();
-      console.log(ctg);
+      var label3 = "#note"+count;
+      var note = $(label3).val();
+      console.log(note);
       if ((name !== "") && (ctg !== undefined)) {
           $.ajax({
               url: "https://docs.google.com/forms/d/1hIOVBntoES0YMM9986imNeL1ABtFa9w9Wwi53GTON9U/formResponse",
-              data: {"entry_307378150" : name, "entry_1918770315" : ctg},
+              data: {"entry_307378150" : name, "entry_1918770315" : ctg, "entry_109030856" : note},
               type: "POST",
               dataType: "xml",
               statusCode: {
@@ -336,7 +477,13 @@ function postContactToGoogle(){
       };
     count += 1;
     };
-    alert("Thank you for your response!");
+    var delay=2500;//1 seconds
+    setTimeout(function(){
+    location.reload();
+
+    //your code to be executed after 1 seconds
+    },delay); 
+    alert("Thank you for your response! Click on OK. The page will automatically refresh in 3 seconds.");
   };
 
     </script>
