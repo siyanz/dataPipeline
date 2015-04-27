@@ -33,9 +33,9 @@
     <hr>
     <h3>100 resulting twitter accounts</h3>
     <p>We used two different methods to select 100 twitter accounts and display them using a bundle chart. The chart shows how each account connect with each other. The end user can explore by scrolling over the twitter names and click on them to go to their twitter page.</p>
-    <p>The grey names are accounts that have been deactivated by the Twitter company while the green ones are still active. Once hovered over an account, there are lines showing connection between accounts. Green lines connect the hovered-over account and accounts it follows (out-degree) while blue lines connect to accounts that follow the hovered-over account (in-degree).</p>
+    <p>The <span style="color:#bbb; font-weight: bold">grey</span> names are accounts that have been deactivated by the Twitter company while the <span style="color:#6e8b3d; font-weight: bold">green</span> ones are still active. Once hovered over an account, there are lines showing connection between accounts. <span style="color:#a8ddb5; font-weight: bold; text-decoration: underline;">Green</span> lines connect the hovered-over account and accounts it follows (out-degree) while <span style="color:#43a2ca; font-weight: bold; text-decoration: underline;">blue</span> lines connect to accounts that follow the hovered-over account (in-degree).</p>
     <h5>Louvain Grouping (left)</h5>
-    <p>We convert the sampled data into dynetml, and conducted a Louvain Grouping [4] to identify actor groups and remove actors that seemed less relevant. This method was able to identify a core cluster of ISIS propagandists. Then, using degree centrality, we narrowed town a list of 100 twitter accounts with high in-degree centrality. This means that they have high follower amount. </p>
+    <p>We convert the sampled data into dynetml, and conducted a Louvain Grouping to identify actor groups and remove actors that seemed less relevant. This method was able to identify a core cluster of ISIS propagandists. Then, using degree centrality, we narrowed town a list of 100 twitter accounts with high in-degree centrality. This means that they have high follower amount. </p>
     <h5>Machine Learning (right)</h5>
     <p>We used ___ algorithm on the sampled twitter database to classify propagandists. As we previously found that many news media accounts were falsely categorized as propagandists, we decided to first train a classifier for news media and take them out from the database. With the rest of the twitter accounts, we trained a separate classifier to identify the propagandists. The feature space we used were __, ___, _____, and _____. As a result, we got ____ twitter accounts that were classified as ISIS propagandists. Out of the ____ accounts, we sampled 100 and displayed them in a bundle chart. </p>
    
@@ -45,7 +45,14 @@
       </div>
   <hr>
   <h3>Who are these Twitter Handles?</h3>
-  <p>You can help us decide whether or not the following twitter accounts are ISIS propagandists. Simply click on the twitter user names in the first column to check out the account twitter page. And make a decision of whether the account holder is a propagandist or non-propagandist using the following criteria:</p>
+  <p>You can help us decide whether or not the following twitter accounts are ISIS propagandists. Simply click on the twitter user names in the first column to check out the account twitter page. And make a decision of whether the account holder is a propagandist or non-propagandist using the following criteria. ISIS propagandists normally:</p>
+  <ul>
+    <li>Choose ISIS/Terrorist content for profile and/or background images</li>
+    <li>Glorify ISIS casualties as martyrs.</li>
+    <li>Proclaim the legitimacy of ISIS as the caliphate.</li>
+    <li>Argue that ongoing battles in Syria and Iraq are Jihad and therefore the duty of all Muslim men.</li>
+  </ul>
+  <p style="color: #de2d26; font-weight: bold; font-size: 16px;">Warning: Some content maybe disturbing for viewers. Viewer discretion is advised.</p>
     <div class="row marketing" style="margin-top: 50px">
       <form target="_self" onsubmit="" action="javascript: postContactToGoogle()">
         <div class="col-lg-8" id = "survey">
@@ -69,6 +76,9 @@
       </form>
       <div class="col-lg-6" id = "graph3"></div>
     </div>
+    <hr>
+  <h3>References</h3>
+  <p>[1]     J. A. Carter, S. Maher, and P. R. Neumann, “#Greenbirds: Measuring Importance and Influence in Syrian Foreign Fighter Networks.” International Centre for the Study of Radicalization, 01-Apr-2014.</p>
   <footer>
     <div class="navbar">
     <p class="navbar-text pull-left">2015 Project for Data Pipeline by Matthew Benigni, Asher Cohan, and Siyan Zhao. </p>
@@ -90,11 +100,8 @@ function get_name(file){
       var i = 0;
       while (i < json.nodes.length){
         if (json.nodes[i].screenName != undefined && 
-            json.nodes[i].screenName != "" && 
-            json.nodes[i].userName != undefined && 
-            json.nodes[i].userName != "" ){
-          array.push(json.nodes[i].userName);
-          userName_dict[json.nodes[i].userName] = json.nodes[i].screenName;
+            json.nodes[i].screenName != ""){
+          array.push(json.nodes[i].screenName);
         };
 
         i++;
@@ -106,7 +113,7 @@ function get_name(file){
       while (j < 5) {
         index = Math.floor(Math.random() * (array.length - 1));
         var key = array[index];
-        id.push({userName: [key], screenName: userName_dict[key]});
+        id.push(key);
         array.splice(index, 1);
         j++;
       }
@@ -117,7 +124,7 @@ function get_name(file){
       var survey_count = 0;
       while (survey_count < id.length) {
       var newdiv = document.createElement('tr');
-      newdiv.innerHTML="<td><a href=http://www.twitter.com/"+id[survey_count].screenName+" target='_blank'><div id='name" + survey_count + "' value='" + id[survey_count].screenName + "'>" + id[survey_count].userName + "</div></a></td><td style='text-align: center;'><input type='radio' name='ctg" + survey_count + "' value='propagandist' required value='1'></td><td style='text-align: center;'><input type='radio' name='ctg" + survey_count + "' value='non-propangandist' required value='1'></td><td><textarea id='note" + survey_count + "' rows = '1' style='width: 100%;'></textarea></td>";
+      newdiv.innerHTML="<td><a href=http://www.twitter.com/"+id[survey_count]+" target='_blank'><div id='name" + survey_count + "' value='" + id[survey_count] + "'>" + id[survey_count] + "</div></a></td><td style='text-align: center;'><input type='radio' name='ctg" + survey_count + "' value='propagandist' required value='1'></td><td style='text-align: center;'><input type='radio' name='ctg" + survey_count + "' value='non-propangandist' required value='1'></td><td><textarea id='note" + survey_count + "' rows = '1' style='width: 100%;'></textarea></td>";
       survey_count += 1;
       document.getElementById('question').appendChild(newdiv);
     }
@@ -301,7 +308,6 @@ d3.json("data/d3data-100.json", function(error, graph) {
 
 
 d3.json("data/d3data-ML.json", function(error, graph) {
-  var new_nodes = convert(graph.nodes)[0];
   var nodes = cluster.nodes(packageHierarchy(graph.nodes)),
     links = packageImports(nodes, graph.links);
   var loading = svg_bundle2.append("text")
@@ -323,23 +329,15 @@ d3.json("data/d3data-ML.json", function(error, graph) {
     .attr("dy", ".1em")
     .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
     .style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
-    .text(function(d, i) {return d.userName;})
+    .text(function(d, i) {return d.screenName;})
     .attr("font-size", "8.5pt")
     .style("fill", function(d) {
-      if (d.suspended == true) {
-        return "#bbb";
-      } else {
-        return "#6e8b3d";
-      }
+      return "#6e8b3d";
     })
     .on("mouseover", mouseovered_2)
     .on("mouseout", mouseouted_2)
     .on("click", function(d) { 
-      if (d.suspended == false){
-        new_page(d); 
-      } else{
-        return;
-      }
+      new_page(d);
     });
 
     loading.remove();
@@ -385,6 +383,7 @@ function new_page(d){
 
 d3.select(self.frameElement).style("height", diameter + "px");
 var count = 0;
+
 // Lazily construct the package hierarchy from class names.
 function packageHierarchy(classes) {
   var map = {};
@@ -401,6 +400,7 @@ function packageHierarchy(classes) {
     return node;
   }
   classes.forEach(function(d) {
+    console.log(d);
     find(d.userId, d);
   });
   return map[""];
@@ -430,15 +430,9 @@ function packageImports(nodes, links) {
   while (++count<node_list.length){
       //----- for bubble chart ------
       current_node = node_list[count];
-      current_node.r = Math.sqrt((current_node.followersCount/100));
-      var followingR = current_node.followingCount/current_node.followersCount;
       // var followerR = 1 - followingR;
       // current_node.FFratio = [followingR, followerR];
       result.push(current_node);
-      //------ for high following/follower ratio----
-      if (followingR > 0.6){
-        highFF.push(current_node.userName);
-      }
   };
   return [result, highFF];
 };
